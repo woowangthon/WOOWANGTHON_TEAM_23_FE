@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">스크롤 메이트</string>
+    <string name="service_label">스크롤 인터럽트</string>
+    <string name="service_description">쇼츠 피드 진입과 스크롤만 감지해 문제 카드를 표시함. 영상 내용, 댓글, 계정 정보는 수집하지 않음.</string>
+</resources>
