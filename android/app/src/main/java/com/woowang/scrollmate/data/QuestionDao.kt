@@ -1,13 +1,13 @@
 package com.woowang.scrollmate.data
 
 import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Upsert
 
 @Dao
 interface QuestionDao {
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    // REPLACE를 쓰면 문제를 다시 받을 때 풀이 기록이 연쇄 삭제되므로 Upsert를 사용함
+    @Upsert
     suspend fun upsertAll(questions: List<Question>)
 
     // 출제할 문제가 있는 과목(null = 미분류)의 목록
