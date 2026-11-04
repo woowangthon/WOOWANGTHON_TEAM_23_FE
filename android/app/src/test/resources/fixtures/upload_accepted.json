@@ -1,0 +1,20 @@
+{
+  "materials": [
+    {
+      "id": "m_010",
+      "name": "운영체제.pdf",
+      "status": "processing",
+      "chunksTotal": 0,
+      "chunksDone": 0,
+      "questionCount": 0
+    },
+    {
+      "id": "m_011",
+      "name": "데이터베이스.pdf",
+      "status": "processing",
+      "chunksTotal": 0,
+      "chunksDone": 0,
+      "questionCount": 0
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- 개발 중 로컬 BE(http)에 붙기 위한 설정. 릴리스 빌드에는 포함되지 않음 -->
+    <application android:usesCleartextTraffic="true" />
+</manifest>
