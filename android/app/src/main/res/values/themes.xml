@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 공유 수신 화면용: 배경이 투명해서 보던 앱 위에 시트만 뜸 -->
+    <style name="Theme.ScrollMate.Translucent" parent="@android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:backgroundDimEnabled">false</item>
+    </style>
+</resources>
