@@ -8,6 +8,7 @@ import android.media.AudioFocusRequest
 import android.media.AudioManager
 import android.os.Handler
 import android.os.Looper
+import android.os.SystemClock
 import android.text.InputType
 import android.util.Log
 import android.view.Gravity
@@ -22,11 +23,11 @@ import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.TextView
+import com.woowang.scrollmate.domain.cardChance
 import kotlin.random.Random
 
 private const val TAG = "ScrollInterrupt"
 private const val SHORTS_FEED_ID = "com.google.android.youtube:id/reel_recycler"
-private const val CARD_CHANCE_PER_SWIPE = 0.1
 private const val PAGE_SETTLE_MS = 400L
 
 // PoC 전용 고정 문제. 실제 출제 로직 아님
@@ -45,6 +46,9 @@ class ScrollInterruptService : AccessibilityService() {
     private var card: View? = null
     private var currentPage: Int? = null
     private var skipNextSwipe = false
+
+    // 쇼츠에 들어온 시각. 쇼츠를 나가면 비워서 다음에 들어올 때 0분부터 다시 셈 (FE #13)
+    private var shortsEnteredAtMs: Long? = null
 
     override fun onServiceConnected() {
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
@@ -66,6 +70,7 @@ class ScrollInterruptService : AccessibilityService() {
         if (feed == null) {
             if (currentPage != null) Log.i(TAG, "shorts exit")
             currentPage = null
+            shortsEnteredAtMs = null
             return
         }
 
@@ -74,7 +79,10 @@ class ScrollInterruptService : AccessibilityService() {
         val previous = currentPage
         currentPage = page
         when (previous) {
-            null -> Log.i(TAG, "shorts enter")
+            null -> {
+                shortsEnteredAtMs = SystemClock.elapsedRealtime()
+                Log.i(TAG, "shorts enter")
+            }
             page -> return
             else -> onSwipe()
         }
@@ -86,8 +94,10 @@ class ScrollInterruptService : AccessibilityService() {
             Log.i(TAG, "swipe skipped")
             return
         }
-        val shouldShow = Random.nextDouble() < CARD_CHANCE_PER_SWIPE
-        Log.i(TAG, "swipe show=$shouldShow")
+        val now = SystemClock.elapsedRealtime()
+        val chance = cardChance(now - (shortsEnteredAtMs ?: now))
+        val shouldShow = Random.nextDouble() < chance
+        Log.i(TAG, "swipe chance=$chance show=$shouldShow")
         if (shouldShow) {
             skipNextSwipe = true
             showCard()

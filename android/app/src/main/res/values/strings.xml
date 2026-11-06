@@ -5,4 +5,18 @@
     <string name="service_description">쇼츠 피드 진입과 스크롤만 감지해 문제 카드를 표시함. 영상 내용, 댓글, 계정 정보는 수집하지 않음.</string>
     <string name="home_title">스크롤 메이트</string>
     <string name="home_placeholder">홈 화면 준비 중</string>
+
+    <string name="upload_button">자료 올리기</string>
+    <string name="upload_sheet_title">이 자료로 문제를 준비할게요</string>
+    <string name="upload_pdf_hint">글자가 선택되는 PDF나 PPTX만 올릴 수 있어요. 스캔본이나 사진은 읽지 못해요.</string>
+    <string name="upload_subject_label">과목 (선택)</string>
+    <string name="subject_unclassified">미분류</string>
+    <string name="subject_new_hint">새 과목 이름</string>
+    <string name="upload_confirm">올리기</string>
+    <string name="upload_started">올려 뒀어요. 준비되면 문제로 만나요</string>
+    <string name="upload_copy_failed">파일을 읽지 못했어요. 다시 골라 주세요</string>
+    <string name="upload_nothing_to_upload">올릴 수 있는 PDF나 PPTX가 없어요</string>
+    <string name="upload_unsupported">PDF나 PPTX가 아니라서 뺐어요: %1$s</string>
+    <string name="upload_too_large">%1$dMB를 넘어서 뺐어요: %2$s</string>
+    <string name="upload_over_limit">한 번에 %1$d개까지만 올릴 수 있어서 %2$d개는 뺐어요</string>
 </resources>

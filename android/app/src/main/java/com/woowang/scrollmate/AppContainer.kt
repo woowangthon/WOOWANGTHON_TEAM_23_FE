@@ -17,7 +17,11 @@ class AppContainer(context: Context) {
         context.applicationContext,
         AppDatabase::class.java,
         DATABASE_NAME,
-    ).build()
+    )
+        // 시연 기간에는 스키마가 바뀌어도 앱이 멈추지 않게 기존 데이터를 지우고 다시 만듦.
+        // 이 경우 기기에 저장된 문제와 풀이 기록이 사라지므로, 실제 배포 전에 마이그레이션으로 바꿔야 함
+        .fallbackToDestructiveMigration(dropAllTables = true)
+        .build()
 
     private val deviceId = DeviceId(context)
 
