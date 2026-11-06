@@ -6,36 +6,53 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class UploadPolicyTest {
-    private fun pdf(name: String) = UploadCandidate(name, PDF_MIME_TYPE)
+    private fun pdf(name: String, size: Long? = null) = UploadCandidate(name, PDF_MIME_TYPE, size)
 
     @Test
-    fun pdfByMimeTypeIsAccepted() {
-        assertTrue(isPdf(UploadCandidate("a", PDF_MIME_TYPE)))
+    fun pdfAndPptxByMimeTypeAreSupported() {
+        assertTrue(isSupportedDocument(UploadCandidate("a", PDF_MIME_TYPE)))
+        assertTrue(isSupportedDocument(UploadCandidate("a", PPTX_MIME_TYPE)))
     }
 
     @Test
-    fun pdfByExtensionIsAcceptedWhenMimeTypeIsGeneric() {
-        assertTrue(isPdf(UploadCandidate("운영체제.PDF", "application/octet-stream")))
-        assertTrue(isPdf(UploadCandidate("a.pdf", null)))
+    fun supportedByExtensionWhenMimeTypeIsGeneric() {
+        assertTrue(isSupportedDocument(UploadCandidate("운영체제.PDF", "application/octet-stream")))
+        assertTrue(isSupportedDocument(UploadCandidate("강의.pptx", "application/octet-stream")))
+        assertTrue(isSupportedDocument(UploadCandidate("a.pdf", null)))
     }
 
     @Test
-    fun nonPdfIsRejected() {
-        assertFalse(isPdf(UploadCandidate("a.png", "image/png")))
-        assertFalse(isPdf(UploadCandidate("a.pdf.exe", null)))
+    fun otherFormatsAreRejected() {
+        assertFalse(isSupportedDocument(UploadCandidate("a.png", "image/png")))
+        assertFalse(isSupportedDocument(UploadCandidate("a.hwp", "application/x-hwp")))
+        assertFalse(isSupportedDocument(UploadCandidate("a.pdf.exe", null)))
+        // 구형 PPT는 지원하지 않음
+        assertFalse(isSupportedDocument(UploadCandidate("a.ppt", "application/vnd.ms-powerpoint")))
     }
 
     @Test
-    fun selectionSeparatesNonPdfFiles() {
+    fun selectionSeparatesUnsupportedFiles() {
         val result = selectForUpload(listOf(pdf("a.pdf"), UploadCandidate("b.png", "image/png")))
 
         assertEquals(listOf("a.pdf"), result.accepted.map { it.name })
-        assertEquals(listOf("b.png"), result.notPdf.map { it.name })
+        assertEquals(listOf("b.png"), result.unsupported.map { it.name })
         assertTrue(result.overLimit.isEmpty())
+        assertTrue(result.tooLarge.isEmpty())
     }
 
     @Test
-    fun selectionDropsFilesOverTheLimitFromTheEnd() {
+    fun filesOverTheSizeLimitAreSeparated() {
+        val limit = 20L * 1024 * 1024
+        val files = listOf(pdf("ok.pdf", limit), pdf("big.pdf", limit + 1), pdf("unknown.pdf", null))
+
+        val result = selectForUpload(files, maxFileBytes = limit)
+
+        assertEquals(listOf("ok.pdf", "unknown.pdf"), result.accepted.map { it.name })
+        assertEquals(listOf("big.pdf"), result.tooLarge.map { it.name })
+    }
+
+    @Test
+    fun selectionDropsFilesOverTheCountLimitFromTheEnd() {
         val files = (1..7).map { pdf("$it.pdf") }
 
         val result = selectForUpload(files, maxFiles = 5)
@@ -45,14 +62,17 @@ class UploadPolicyTest {
     }
 
     @Test
-    fun nonPdfFilesDoNotCountTowardTheLimit() {
-        val files = (1..5).map { pdf("$it.pdf") } + UploadCandidate("x.png", "image/png")
+    fun rejectedFilesDoNotCountTowardTheCountLimit() {
+        val files = (1..5).map { pdf("$it.pdf") } +
+            UploadCandidate("x.png", "image/png") +
+            pdf("big.pdf", Long.MAX_VALUE)
 
         val result = selectForUpload(files, maxFiles = 5)
 
         assertEquals(5, result.accepted.size)
         assertTrue(result.overLimit.isEmpty())
-        assertEquals(1, result.notPdf.size)
+        assertEquals(1, result.unsupported.size)
+        assertEquals(1, result.tooLarge.size)
     }
 
     @Test
@@ -60,7 +80,8 @@ class UploadPolicyTest {
         val result = selectForUpload(emptyList())
 
         assertTrue(result.accepted.isEmpty())
-        assertTrue(result.notPdf.isEmpty())
+        assertTrue(result.unsupported.isEmpty())
+        assertTrue(result.tooLarge.isEmpty())
         assertTrue(result.overLimit.isEmpty())
     }
 }

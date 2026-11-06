@@ -34,12 +34,14 @@ class MaterialRepository(
         refreshMaterials()
         val response = api.getQuestions(since = syncState.lastQuestionSync)
         val knownMaterials = materials.getAll().map { it.id }.toSet()
-        questions.upsertAll(
-            response.questions
-                .mapNotNull { it.toEntityOrNull() }
-                .filter { it.materialId in knownMaterials },
-        )
-        syncState.lastQuestionSync = response.serverTime
+        val (storable, orphans) = response.questions
+            .mapNotNull { it.toEntityOrNull() }
+            .partition { it.materialId in knownMaterials }
+        questions.upsertAll(storable)
+
+        // 자료가 아직 기기에 없어서 담지 못한 문제가 있으면 동기화 시각을 올리지 않음.
+        // 올리면 다음 since 조회에 그 문제가 다시 오지 않아 영영 잃게 됨
+        if (orphans.isEmpty()) syncState.lastQuestionSync = response.serverTime
     }
 
     suspend fun delete(materialId: String) {

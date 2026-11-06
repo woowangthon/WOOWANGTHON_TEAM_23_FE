@@ -109,6 +109,21 @@ class UploadExecutorTest {
     }
 
     @Test
+    fun dailyRateLimitFailsWithoutRetry() = runBlocking {
+        respond(429, fixture("error_rate_limited.json"))
+
+        assertEquals(UploadOutcome.Failed("rate_limited"), executor.run(files, null))
+        assertTrue(materials.rows.isEmpty())
+    }
+
+    @Test
+    fun unknown429IsRetried() = runBlocking {
+        respond(429, "")
+
+        assertEquals(UploadOutcome.Retry, executor.run(files, null))
+    }
+
+    @Test
     fun serverErrorIsRetried() = runBlocking {
         respond(502, fixture("error_llm_unavailable.json"))
 

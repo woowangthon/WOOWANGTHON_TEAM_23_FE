@@ -10,7 +10,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import com.woowang.scrollmate.domain.PDF_MIME_TYPE
+import com.woowang.scrollmate.domain.SUPPORTED_MIME_TYPES
 import com.woowang.scrollmate.ui.HomeScreen
 import com.woowang.scrollmate.ui.ScrollMateTheme
 import com.woowang.scrollmate.ui.UploadFlow
@@ -25,7 +25,7 @@ class MainActivity : ComponentActivity() {
                     ActivityResultContracts.OpenMultipleDocuments(),
                 ) { pickedUris = it }
 
-                HomeScreen(onUploadClick = { picker.launch(arrayOf(PDF_MIME_TYPE)) })
+                HomeScreen(onUploadClick = { picker.launch(SUPPORTED_MIME_TYPES) })
 
                 if (pickedUris.isNotEmpty()) {
                     UploadFlow(uris = pickedUris, onFinished = { pickedUris = emptyList() })

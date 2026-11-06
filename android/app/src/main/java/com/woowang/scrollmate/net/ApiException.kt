@@ -10,6 +10,12 @@ class ApiException(
 ) : Exception(message) {
     companion object {
         const val CODE_UNKNOWN = "unknown"
+
+        // 동시에 처리 중인 자료가 너무 많음. 잠시 뒤 다시 하면 됨 (429)
+        const val CODE_TOO_MANY_MATERIALS = "too_many_materials"
+
+        // 기기 ID별 하루 사용 한도 초과 (429). 다시 시도해도 당분간 같은 결과임
+        const val CODE_RATE_LIMITED = "rate_limited"
     }
 }
 

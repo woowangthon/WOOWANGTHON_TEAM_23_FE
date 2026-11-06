@@ -185,6 +185,37 @@ class MaterialRepositoryTest {
         repository.syncQuestions()
 
         assertEquals(setOf("q_ok"), questions.rows.keys)
+        // 고아 문제가 있으므로 동기화 시각은 올리지 않음
+        assertNull(syncState.lastQuestionSync)
+    }
+
+    @Test
+    fun syncDoesNotAdvanceTimeWhileAQuestionIsWaitingForItsMaterial() = runBlocking {
+        val orphanOnly = """
+            {
+              "questions": [
+                { "id": "q_late", "materialId": "m_001", "type": "ox", "question": "a", "answer": "O", "evidence": "e" }
+              ],
+              "serverTime": "2026-11-03T22:00:00+09:00"
+            }
+        """.trimIndent()
+        // 첫 번째 동기화: 자료 목록이 비어 있어 문제를 담지 못함
+        respond(200, """{ "materials": [] }""")
+        respond(200, orphanOnly)
+
+        repository.syncQuestions()
+
+        assertTrue(questions.rows.isEmpty())
+        assertNull(syncState.lastQuestionSync)
+
+        // 두 번째 동기화: 자료가 생겼고 같은 since로 다시 받아 문제를 담음
+        respond(200, fixture("materials_list.json"))
+        respond(200, orphanOnly)
+
+        repository.syncQuestions()
+
+        assertEquals(setOf("q_late"), questions.rows.keys)
+        assertEquals("2026-11-03T22:00:00+09:00", syncState.lastQuestionSync)
     }
 
     @Test

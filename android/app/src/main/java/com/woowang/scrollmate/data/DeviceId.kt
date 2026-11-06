@@ -11,7 +11,12 @@ class DeviceId(context: Context) {
     private val prefs = context.applicationContext
         .getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
-    fun get(): String = prefs.getString(KEY_DEVICE_ID, null) ?: UUID.randomUUID().toString().also {
-        prefs.edit().putString(KEY_DEVICE_ID, it).apply()
+    // lazy는 여러 스레드에서 동시에 처음 불러도 한 번만 만들어서 서로 다른 ID가 나가지 않음
+    private val id: String by lazy {
+        prefs.getString(KEY_DEVICE_ID, null) ?: UUID.randomUUID().toString().also {
+            prefs.edit().putString(KEY_DEVICE_ID, it).apply()
+        }
     }
+
+    fun get(): String = id
 }
