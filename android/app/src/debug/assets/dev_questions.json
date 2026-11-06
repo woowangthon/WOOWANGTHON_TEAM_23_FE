@@ -1,0 +1,32 @@
+{
+  "questions": [
+    {
+      "id": "dev_001",
+      "materialId": "dev",
+      "type": "ox",
+      "question": "[샘플] 대한민국의 수도는 서울이다.",
+      "answer": "O",
+      "accepted": [],
+      "evidence": "개발용 샘플 문제"
+    },
+    {
+      "id": "dev_002",
+      "materialId": "dev",
+      "type": "short",
+      "question": "[샘플] 프로세스가 사용하는 주소 공간을 고정 크기 단위로 나누는 기법은?",
+      "answer": "페이징",
+      "accepted": ["페이징", "paging"],
+      "evidence": "개발용 샘플 문제"
+    },
+    {
+      "id": "dev_003",
+      "materialId": "dev",
+      "type": "ox",
+      "question": "[샘플] HTTP 상태 코드 404는 서버 내부 오류를 뜻한다.",
+      "answer": "X",
+      "accepted": [],
+      "evidence": "개발용 샘플 문제"
+    }
+  ],
+  "serverTime": "2026-11-07T00:00:00+09:00"
+}
