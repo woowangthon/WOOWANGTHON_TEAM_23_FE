@@ -4,7 +4,10 @@ import android.app.Application
 import android.content.Context
 import androidx.room.Room
 import com.woowang.scrollmate.data.AppDatabase
+import com.woowang.scrollmate.data.CardQuestionSource
 import com.woowang.scrollmate.data.DeviceId
+import com.woowang.scrollmate.data.Question
+import com.woowang.scrollmate.data.loadDevQuestions
 import com.woowang.scrollmate.data.MaterialRepository
 import com.woowang.scrollmate.data.PrefsSyncState
 import com.woowang.scrollmate.net.ApiClient
@@ -26,6 +29,14 @@ class AppContainer(context: Context) {
     private val deviceId = DeviceId(context)
 
     val api = ApiClient(BuildConfig.API_BASE_URL, deviceId::get)
+
+    val cardQuestionSource = CardQuestionSource(
+        subjects = database.subjectDao(),
+        questions = database.questionDao(),
+    )
+
+    // 개발용 샘플 문제. 디버그 빌드에만 있고 DB에는 넣지 않음
+    val devQuestions: List<Question> = loadDevQuestions(context)
 
     val materialRepository = MaterialRepository(
         api = api,
