@@ -6,4 +6,7 @@
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:backgroundDimEnabled">false</item>
     </style>
+
+    <!-- 접근성 서비스 컨텍스트에는 테마가 없어서 카드를 만들 때 이 테마로 감쌈 -->
+    <style name="Theme.ScrollMate.Card" parent="@android:style/Theme.Material.Light.NoActionBar" />
 </resources>

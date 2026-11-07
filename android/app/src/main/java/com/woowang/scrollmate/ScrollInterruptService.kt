@@ -1,34 +1,20 @@
 package com.woowang.scrollmate
 
 import android.accessibilityservice.AccessibilityService
-import android.graphics.Color
-import android.graphics.PixelFormat
-import android.graphics.drawable.GradientDrawable
 import android.media.AudioFocusRequest
 import android.media.AudioManager
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
-import android.text.InputType
 import android.util.Log
-import android.view.Gravity
-import android.view.View
-import android.view.ViewGroup.LayoutParams.MATCH_PARENT
-import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
-import android.widget.Button
-import android.widget.EditText
-import android.widget.FrameLayout
-import android.widget.LinearLayout
-import android.widget.TextView
 import android.widget.Toast
 import com.woowang.scrollmate.data.AnswerRecord
 import com.woowang.scrollmate.data.AnswerResult
 import com.woowang.scrollmate.data.DEV_MATERIAL_ID
 import com.woowang.scrollmate.data.Question
-import com.woowang.scrollmate.data.QuestionType
 import com.woowang.scrollmate.domain.cardChance
 import com.woowang.scrollmate.domain.grade
 import kotlinx.coroutines.CoroutineScope
@@ -55,7 +41,7 @@ class ScrollInterruptService : AccessibilityService() {
 
     private val handler = Handler(Looper.getMainLooper())
     private var checkPending = false
-    private var card: View? = null
+    private var card: CardOverlay? = null
     private var currentPage: Int? = null
     private var skipNextSwipe = false
 
@@ -154,25 +140,15 @@ class ScrollInterruptService : AccessibilityService() {
         val focus = audioManager.requestAudioFocus(audioFocus)
         Log.i(TAG, "card shown audioFocus=$focus question=${question.id}")
 
-        val view = buildCard(question)
-        val params = WindowManager.LayoutParams(
-            MATCH_PARENT,
-            MATCH_PARENT,
-            WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY,
-            0,
-            PixelFormat.TRANSLUCENT,
-        ).apply {
-            softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
-        }
-        windowManager.addView(view, params)
-        card = view
+        card = CardOverlay(this, windowManager, question) { input -> dismissCard(question, input) }
+            .also { it.show() }
     }
 
     // input이 null이면 건너뜀
     private fun dismissCard(question: Question, input: String?) {
         val result = if (input == null) AnswerResult.SKIPPED else grade(question, input)
         Log.i(TAG, "card dismissed question=${question.id} result=$result")
-        windowManager.removeView(card)
+        card?.remove()
         card = null
         audioManager.abandonAudioFocusRequest(audioFocus)
 
@@ -196,51 +172,4 @@ class ScrollInterruptService : AccessibilityService() {
     }
 
     private fun toast(message: String) = Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
-
-    private fun buildCard(question: Question): View {
-        val input = EditText(this).apply {
-            hint = getString(R.string.card_short_hint)
-            inputType = InputType.TYPE_CLASS_TEXT
-            setTextColor(Color.BLACK)
-            setHintTextColor(Color.GRAY)
-        }
-        val body = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            setPadding(56, 56, 56, 40)
-            background = GradientDrawable().apply {
-                setColor(Color.WHITE)
-                cornerRadius = 48f
-            }
-            addView(TextView(context).apply {
-                text = question.question
-                textSize = 18f
-                setTextColor(Color.BLACK)
-            })
-            when (question.type) {
-                QuestionType.OX -> {
-                    addView(answerButton("O") { dismissCard(question, "O") })
-                    addView(answerButton("X") { dismissCard(question, "X") })
-                }
-                QuestionType.SHORT -> {
-                    addView(input)
-                    addView(answerButton(getString(R.string.card_submit)) { dismissCard(question, input.text.toString()) })
-                }
-            }
-            addView(answerButton(getString(R.string.card_skip)) { dismissCard(question, null) })
-        }
-        return FrameLayout(this).apply {
-            setBackgroundColor(0x99000000.toInt())
-            addView(
-                body,
-                FrameLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT, Gravity.CENTER).apply {
-                    setMargins(48, 48, 48, 48)
-                },
-            )
-        }
-    }
-
-    private fun answerButton(label: String, onClick: () -> Unit) = Button(this).apply {
-        text = label
-        setOnClickListener { onClick() }
-    }
 }
