@@ -3,4 +3,8 @@
     <dimen name="screen_padding">24dp</dimen>
     <dimen name="sheet_padding">24dp</dimen>
     <dimen name="sheet_spacing">12dp</dimen>
+    <dimen name="card_margin">16dp</dimen>
+    <dimen name="card_padding">20dp</dimen>
+    <dimen name="card_radius">16dp</dimen>
+    <dimen name="card_text_size">18sp</dimen>
 </resources>
