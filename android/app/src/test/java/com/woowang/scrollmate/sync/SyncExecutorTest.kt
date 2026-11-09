@@ -38,8 +38,7 @@ private class MemoryQuestions : QuestionDao {
         questions.forEach { rows[it.id] = it }
     }
     override suspend fun subjectIdsWithQuestions(): List<Long?> = emptyList()
-    override suspend fun randomUnanswered(subjectId: Long?): Question? = null
-    override suspend fun randomAny(subjectId: Long?): Question? = null
+    override suspend fun questionsOfSubject(subjectId: Long?): List<Question> = emptyList()
 }
 
 private class MemorySync : SyncState {

@@ -19,26 +19,13 @@ interface QuestionDao {
     )
     suspend fun subjectIdsWithQuestions(): List<Long?>
 
-    // 아직 풀지 않은 문제 중 하나. 과목 id가 null이면 미분류
+    // 한 학습 주제(null = 미분류)의 문제 전부. 어떤 문제를 낼지는 풀이 기록과 함께 앱에서 정함
     @Query(
         """
         SELECT q.* FROM question q
         JOIN material m ON m.id = q.materialId
         WHERE m.subjectId IS :subjectId
-          AND q.id NOT IN (SELECT questionId FROM answer_record)
-        ORDER BY RANDOM() LIMIT 1
         """,
     )
-    suspend fun randomUnanswered(subjectId: Long?): Question?
-
-    // 안 푼 문제가 없을 때의 대체. 과목 안에서 무작위
-    @Query(
-        """
-        SELECT q.* FROM question q
-        JOIN material m ON m.id = q.materialId
-        WHERE m.subjectId IS :subjectId
-        ORDER BY RANDOM() LIMIT 1
-        """,
-    )
-    suspend fun randomAny(subjectId: Long?): Question?
+    suspend fun questionsOfSubject(subjectId: Long?): List<Question>
 }

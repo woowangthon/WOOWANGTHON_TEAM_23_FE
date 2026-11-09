@@ -37,8 +37,7 @@ private class MemoryMaterialDao : MaterialDao {
 private class UnusedQuestionDao : QuestionDao {
     override suspend fun upsertAll(questions: List<Question>) = Unit
     override suspend fun subjectIdsWithQuestions(): List<Long?> = emptyList()
-    override suspend fun randomUnanswered(subjectId: Long?): Question? = null
-    override suspend fun randomAny(subjectId: Long?): Question? = null
+    override suspend fun questionsOfSubject(subjectId: Long?): List<Question> = emptyList()
 }
 
 private class MemorySyncState : SyncState {
