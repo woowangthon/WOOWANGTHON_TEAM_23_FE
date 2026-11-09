@@ -18,6 +18,11 @@ private const val MAX_ATTEMPTS = 3
 private const val BACKOFF_SECONDS = 30L
 private const val PERIODIC_MINUTES = 15L
 private const val AFTER_UPLOAD_DELAY_SECONDS = 60L
+
+// 자료가 처리 중인 동안 60초 간격으로 최대 7번 더 받음. WorkManager 작업은 약 10분까지 돌 수 있어 그 안에 끝나게 함.
+// 임의로 정한 값이므로 서버 생성 시간에 맞춰 조정함
+private const val POLL_WAIT_MILLIS = 60_000L
+private const val MAX_POLLS = 7
 private const val WORK_NOW = "sync-questions-now"
 private const val WORK_AFTER_UPLOAD = "sync-questions-after-upload"
 private const val WORK_PERIODIC = "sync-questions-periodic"
@@ -27,7 +32,7 @@ class SyncWorker(context: Context, params: WorkerParameters) : CoroutineWorker(c
 
     override suspend fun doWork(): Result {
         val repository = (applicationContext as ScrollMateApp).container.materialRepository
-        return when (SyncExecutor(repository).run()) {
+        return when (SyncExecutor(repository).runWhileProcessing(MAX_POLLS, POLL_WAIT_MILLIS)) {
             SyncOutcome.Success -> Result.success()
             SyncOutcome.Retry -> if (runAttemptCount + 1 >= MAX_ATTEMPTS) Result.failure() else Result.retry()
             is SyncOutcome.Failed -> Result.failure()
