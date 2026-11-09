@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- Android 17(API 37)은 사설 주소(10.0.2.2 등)에 접속하려면 이 권한이 필요함. 없으면 연결이 10초 뒤 시간 초과로 실패함.
+         디버그 빌드에만 있고, 배포는 공개 주소(https)라 필요 없음 (FE #31) -->
+    <uses-permission android:name="android.permission.ACCESS_LOCAL_NETWORK" />
+
     <!-- 개발 중 로컬 BE(http)에 붙기 위한 설정. 릴리스 빌드에는 포함되지 않음 -->
     <application android:usesCleartextTraffic="true" />
 </manifest>
