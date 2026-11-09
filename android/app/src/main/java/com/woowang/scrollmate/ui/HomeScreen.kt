@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
@@ -14,7 +15,7 @@ import com.woowang.scrollmate.R
 
 // 홈 화면 뼈대. 오늘의 한마디, D-day, 과목 목록은 이후 단계에서 채움
 @Composable
-fun HomeScreen(onUploadClick: () -> Unit) {
+fun HomeScreen(onUploadClick: () -> Unit, onGuideClick: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -30,6 +31,9 @@ fun HomeScreen(onUploadClick: () -> Unit) {
         )
         Button(onClick = onUploadClick) {
             Text(stringResource(R.string.upload_button))
+        }
+        TextButton(onClick = onGuideClick) {
+            Text(stringResource(R.string.home_guide_button))
         }
     }
 }
