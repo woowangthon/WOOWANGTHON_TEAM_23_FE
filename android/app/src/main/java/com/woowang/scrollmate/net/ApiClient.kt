@@ -15,6 +15,7 @@ import okio.BufferedSink
 import okio.source
 import java.io.IOException
 import java.io.InputStream
+import java.util.concurrent.TimeUnit
 
 private const val API_PREFIX = "/api/v1"
 private const val HEADER_DEVICE_ID = "X-Device-Id"
@@ -22,6 +23,18 @@ private const val FIELD_FILES = "files"
 private const val JSON_MEDIA_TYPE = "application/json; charset=utf-8"
 
 val ApiJson = Json { ignoreUnknownKeys = true }
+
+private const val CONNECT_TIMEOUT_SECONDS = 10L
+
+// 업로드 응답은 서버가 파일에서 글자를 뽑은 뒤에 오므로 기본값 10초로는 큰 파일에서 시간 초과가 날 수 있음.
+// 실제로 필요한 시간은 기기에서 재 보고 조정함
+private const val TRANSFER_TIMEOUT_SECONDS = 60L
+
+private fun defaultHttpClient() = OkHttpClient.Builder()
+    .connectTimeout(CONNECT_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+    .readTimeout(TRANSFER_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+    .writeTimeout(TRANSFER_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+    .build()
 
 // 올릴 파일 하나. 공유로 받은 content:// 파일도 스트림으로만 다루기 위해 열기 함수를 받음
 class UploadFile(
@@ -34,7 +47,7 @@ class UploadFile(
 class ApiClient(
     baseUrl: String,
     private val deviceId: () -> String,
-    private val http: OkHttpClient = OkHttpClient(),
+    private val http: OkHttpClient = defaultHttpClient(),
     private val json: Json = ApiJson,
 ) {
     private val base = baseUrl.trimEnd('/')
