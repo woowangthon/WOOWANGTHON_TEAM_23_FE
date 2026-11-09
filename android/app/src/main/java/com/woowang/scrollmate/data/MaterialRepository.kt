@@ -44,6 +44,10 @@ class MaterialRepository(
         if (orphans.isEmpty()) syncState.lastQuestionSync = response.serverTime
     }
 
+    // 서버가 아직 문제를 만드는 중인 자료가 있는지. 있으면 문제가 더 생기므로 다시 받아야 함
+    suspend fun hasProcessingMaterials(): Boolean =
+        materials.getAll().any { it.status == MaterialStatus.PROCESSING }
+
     suspend fun delete(materialId: String) {
         api.deleteMaterial(materialId)
         materials.delete(materialId)

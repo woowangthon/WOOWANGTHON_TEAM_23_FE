@@ -115,6 +115,63 @@ class SyncExecutorTest {
         assertEquals(SyncOutcome.Retry, executor.run())
     }
 
+    private fun materialsJson(status: String) = """
+        {"materials":[{"id":"m_001","name":"a.pdf","status":"$status","chunksTotal":2,"chunksDone":1,"questionCount":1}]}
+    """.trimIndent()
+
+    private fun questionsJson(id: String) = """
+        {"questions":[{"id":"$id","materialId":"m_001","type":"ox","question":"문장","answer":"O","accepted":[],"evidence":"근거"}],
+         "serverTime":"2026-11-09T12:00:00+09:00"}
+    """.trimIndent()
+
+    @Test
+    fun processingMaterialsAreFetchedAgainUntilReady() = runBlocking {
+        respond(200, materialsJson("processing"))
+        respond(200, questionsJson("q_001"))
+        respond(200, materialsJson("ready"))
+        respond(200, questionsJson("q_002"))
+
+        val outcome = executor.runWhileProcessing(maxPolls = 5, waitMillis = 0)
+
+        assertEquals(SyncOutcome.Success, outcome)
+        assertEquals(setOf("q_001", "q_002"), questions.rows.keys)
+        assertEquals(4, server.requestCount)
+    }
+
+    @Test
+    fun readyMaterialsAreFetchedOnlyOnce() = runBlocking {
+        respond(200, materialsJson("ready"))
+        respond(200, questionsJson("q_001"))
+
+        executor.runWhileProcessing(maxPolls = 5, waitMillis = 0)
+
+        assertEquals(2, server.requestCount)
+    }
+
+    @Test
+    fun pollingStopsAtMaxPollsWhenServerKeepsProcessing() = runBlocking {
+        repeat(3) {
+            respond(200, materialsJson("processing"))
+            respond(200, questionsJson("q_001"))
+        }
+
+        val outcome = executor.runWhileProcessing(maxPolls = 2, waitMillis = 0)
+
+        assertEquals(SyncOutcome.Success, outcome)
+        assertEquals(6, server.requestCount)
+    }
+
+    @Test
+    fun pollingReturnsTheFailureWhenARepeatFails() = runBlocking {
+        respond(200, materialsJson("processing"))
+        respond(200, questionsJson("q_001"))
+        respond(502, fixture("error_llm_unavailable.json"))
+
+        val outcome = executor.runWhileProcessing(maxPolls = 5, waitMillis = 0)
+
+        assertEquals(SyncOutcome.Retry, outcome)
+    }
+
     @Test
     fun clientErrorFailsWithoutRetry() = runBlocking {
         respond(400, """{"error":{"code":"invalid_request","message":"잘못된 요청"}}""")
