@@ -17,12 +17,13 @@ import java.time.LocalDate
 
 // 기기에 저장된 학습 주제와 자료를 읽어 홈 화면에 넘김. 학습 주제와 시험일은 기기 DB에만 저장하고 서버로 보내지 않음
 @Composable
-fun HomeRoute(onUploadClick: () -> Unit, onGuideClick: () -> Unit) {
+fun HomeRoute(onUploadClick: () -> Unit, onMaterialsClick: () -> Unit, onGuideClick: () -> Unit) {
     val container = (LocalContext.current.applicationContext as ScrollMateApp).container
     val subjectDao = container.database.subjectDao()
     val subjects by subjectDao.observeAll().collectAsState(initial = emptyList())
     val materials by container.materialRepository.observeMaterials().collectAsState(initial = emptyList())
     val cards = remember(subjects, materials) { buildSubjectCards(subjects, materials, LocalDate.now()) }
+    val failures by container.uploadFailures.failures.collectAsState()
     val scope = rememberCoroutineScope()
 
     // 편집 창: 열려 있는지와 고치는 주제의 id(null이면 새로 만듦)
@@ -42,6 +43,8 @@ fun HomeRoute(onUploadClick: () -> Unit, onGuideClick: () -> Unit) {
             editingId = card.subject?.id
             editorOpen = true
         },
+        failureCount = failures.size,
+        onMaterialsClick = onMaterialsClick,
         onUploadClick = onUploadClick,
         onGuideClick = onGuideClick,
     )

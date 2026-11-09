@@ -12,6 +12,7 @@ import com.woowang.scrollmate.data.MaterialRepository
 import com.woowang.scrollmate.data.PrefsSyncState
 import com.woowang.scrollmate.net.ApiClient
 import com.woowang.scrollmate.sync.SyncScheduler
+import com.woowang.scrollmate.upload.UploadFailureLog
 
 private const val DATABASE_NAME = "scrollmate.db"
 
@@ -38,6 +39,9 @@ class AppContainer(context: Context) {
 
     // 개발용 샘플 문제. 디버그 빌드에만 있고 DB에는 넣지 않음
     val devQuestions: List<Question> = loadDevQuestions(context)
+
+    // 백그라운드 업로드가 실패한 기록. 화면에서 이유를 알려 줄 때 씀
+    val uploadFailures = UploadFailureLog(context)
 
     val materialRepository = MaterialRepository(
         api = api,

@@ -3,6 +3,7 @@ package com.woowang.scrollmate
 import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
@@ -14,6 +15,7 @@ import androidx.compose.runtime.setValue
 import com.woowang.scrollmate.domain.SUPPORTED_MIME_TYPES
 import com.woowang.scrollmate.ui.AccessibilityGuideScreen
 import com.woowang.scrollmate.ui.HomeRoute
+import com.woowang.scrollmate.ui.MaterialListRoute
 import com.woowang.scrollmate.ui.ScrollMateTheme
 import com.woowang.scrollmate.ui.UploadFlow
 
@@ -34,6 +36,7 @@ class MainActivity : ComponentActivity() {
                 // 서비스가 꺼져 있으면 안내를 먼저 보여 주고, 켜지면 자동으로 닫힘. 홈에서 다시 열 수도 있음
                 var guideSkipped by rememberSaveable { mutableStateOf(false) }
                 var guideRequested by rememberSaveable { mutableStateOf(false) }
+                var showMaterials by rememberSaveable { mutableStateOf(false) }
 
                 if (guideRequested || (!serviceEnabled && !guideSkipped)) {
                     AccessibilityGuideScreen(
@@ -45,10 +48,16 @@ class MainActivity : ComponentActivity() {
                         },
                     )
                 } else {
-                    HomeRoute(
-                        onUploadClick = { picker.launch(SUPPORTED_MIME_TYPES) },
-                        onGuideClick = { guideRequested = true },
-                    )
+                    if (showMaterials) {
+                        BackHandler { showMaterials = false }
+                        MaterialListRoute(onBack = { showMaterials = false })
+                    } else {
+                        HomeRoute(
+                            onUploadClick = { picker.launch(SUPPORTED_MIME_TYPES) },
+                            onMaterialsClick = { showMaterials = true },
+                            onGuideClick = { guideRequested = true },
+                        )
+                    }
 
                     if (pickedUris.isNotEmpty()) {
                         UploadFlow(uris = pickedUris, onFinished = { pickedUris = emptyList() })

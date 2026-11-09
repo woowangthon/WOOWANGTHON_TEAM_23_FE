@@ -30,6 +30,8 @@ fun HomeScreen(
     onToggleEnabled: (SubjectCard, Boolean) -> Unit,
     onAddSubject: () -> Unit,
     onEditSubject: (SubjectCard) -> Unit,
+    failureCount: Int,
+    onMaterialsClick: () -> Unit,
     onUploadClick: () -> Unit,
     onGuideClick: () -> Unit,
 ) {
@@ -46,9 +48,17 @@ fun HomeScreen(
             )
         }
         item { TodayMessageCard() }
+        if (failureCount > 0) {
+            item { UploadFailureBanner(failureCount, onMaterialsClick) }
+        }
         item {
             Button(onClick = onUploadClick, modifier = Modifier.fillMaxWidth()) {
                 Text(stringResource(R.string.upload_button))
+            }
+        }
+        item {
+            TextButton(onClick = onMaterialsClick, modifier = Modifier.fillMaxWidth()) {
+                Text(stringResource(R.string.home_materials_button))
             }
         }
         item {
@@ -164,4 +174,24 @@ private fun daysLeftText(daysLeft: Long): String = when {
     daysLeft == 0L -> stringResource(R.string.home_dday_today)
     daysLeft > 0 -> stringResource(R.string.home_dday_left, daysLeft)
     else -> stringResource(R.string.home_dday_past)
+}
+
+// 백그라운드 업로드가 실패했을 때 홈에서 바로 알려 줌. 이유와 다음 행동은 자료 목록에서 보여 줌
+@Composable
+private fun UploadFailureBanner(count: Int, onMaterialsClick: () -> Unit) {
+    Card(onClick = onMaterialsClick, modifier = Modifier.fillMaxWidth()) {
+        Column(
+            modifier = Modifier.padding(dimensionResource(R.dimen.sheet_padding)),
+            verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.sheet_spacing)),
+        ) {
+            Text(
+                text = stringResource(R.string.home_upload_failed_banner, count),
+                style = MaterialTheme.typography.bodyLarge,
+            )
+            Text(
+                text = stringResource(R.string.home_upload_failed_action),
+                style = MaterialTheme.typography.bodySmall,
+            )
+        }
+    }
 }

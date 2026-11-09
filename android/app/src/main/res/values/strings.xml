@@ -14,6 +14,33 @@
     <string name="home_dday_past">시험일이 지났어요</string>
     <string name="home_enabled_label">문제 내기</string>
 
+    <string name="home_materials_button">올린 자료 보기</string>
+    <string name="home_upload_failed_banner">올리지 못한 자료가 %1$d건 있어요</string>
+    <string name="home_upload_failed_action">눌러서 이유를 확인해요</string>
+
+    <string name="materials_title">올린 자료</string>
+    <string name="materials_back">뒤로</string>
+    <string name="materials_refresh">새로고침</string>
+    <string name="materials_refreshing">불러오는 중</string>
+    <string name="materials_empty">아직 올린 자료가 없어요. 홈에서 자료를 올려 보세요</string>
+    <string name="materials_status_processing">문제를 만드는 중이에요</string>
+    <string name="materials_status_processing_progress">문제를 만드는 중이에요 (%1$d/%2$d)</string>
+    <string name="materials_status_ready">문제가 준비됐어요</string>
+    <string name="materials_status_failed">문제를 만들지 못했어요. 자료를 지우고 다시 올려 보세요</string>
+    <string name="materials_question_count">문제 %1$d개</string>
+    <string name="materials_delete">삭제</string>
+    <string name="materials_delete_confirm_title">%1$s 자료를 삭제할까요?</string>
+    <string name="materials_delete_confirm_body">이 자료로 만든 문제와 풀이 기록도 함께 지워져요</string>
+    <string name="materials_refresh_failed">자료 상태를 불러오지 못했어요. 연결을 확인해 주세요</string>
+    <string name="materials_delete_failed">자료를 지우지 못했어요. 연결을 확인하고 다시 해 주세요</string>
+    <string name="materials_failure_dismiss">확인했어요</string>
+
+    <string name="upload_failed_unsupported">%1$s: 글자를 읽지 못했어요. 스캔본이나 사진이 아니라 글자가 선택되는 PDF나 PPTX로 올려 주세요</string>
+    <string name="upload_failed_too_large">%1$s: 파일이 너무 커요. 파일당 %2$dMB, 100쪽 이하로 나눠서 올려 주세요</string>
+    <string name="upload_failed_rate_limited">%1$s: 오늘 올릴 수 있는 한도를 넘었어요. 내일 다시 올려 주세요</string>
+    <string name="upload_failed_network">%1$s: 서버가 바쁘거나 연결이 불안정해서 올리지 못했어요. 연결을 확인하고 잠시 뒤 다시 올려 주세요</string>
+    <string name="upload_failed_other">%1$s: 올리지 못했어요. 잠시 뒤 다시 올려 보세요</string>
+
     <string name="subject_add">학습 주제 추가</string>
     <string name="subject_new_title">새 학습 주제</string>
     <string name="subject_edit_title">학습 주제 수정</string>
