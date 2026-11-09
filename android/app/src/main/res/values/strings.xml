@@ -14,6 +14,21 @@
     <string name="card_correct">정답이에요</string>
     <string name="card_wrong">아쉬워요. 정답: %1$s</string>
 
+    <string name="guide_title">카드를 띄우려면 접근성 서비스를 켜 주세요</string>
+    <string name="guide_enabled_title">접근성 서비스가 켜져 있어요</string>
+    <string name="guide_scope_title">허용하면 이렇게 동작해요</string>
+    <string name="guide_scope">YouTube 쇼츠에 들어오고 넘기는 것만 감지해서 문제 카드를 띄워요. 영상 내용, 댓글, 계정 정보는 수집하지 않아요.</string>
+    <string name="guide_steps_title">켜는 방법</string>
+    <string name="guide_step_1">1. 아래 버튼으로 접근성 설정을 열어요</string>
+    <string name="guide_step_2">2. 설치된 앱(또는 다운로드한 앱)에서 \'%1$s\'를 골라요</string>
+    <string name="guide_step_3">3. 사용으로 바꾸고 허용해요</string>
+    <string name="guide_restricted">허용이 흐리게 보이면 설정의 앱 목록에서 %1$s를 열고 오른쪽 위 더보기(⋮)에서 \'제한된 설정 허용\'을 먼저 선택해요</string>
+    <string name="guide_reinstall">이미 켜 두었는데 카드가 뜨지 않으면(앱을 다시 설치한 뒤 등) 접근성 서비스를 껐다가 다시 켜 주세요</string>
+    <string name="guide_open_settings">접근성 설정 열기</string>
+    <string name="guide_later">나중에 할게요</string>
+    <string name="guide_close">닫기</string>
+    <string name="home_guide_button">접근성 서비스 안내</string>
+
     <string name="upload_button">자료 올리기</string>
     <string name="upload_sheet_title">이 자료로 문제를 준비할게요</string>
     <string name="upload_pdf_hint">글자가 선택되는 PDF나 PPTX만 올릴 수 있어요. 스캔본이나 사진은 읽지 못해요.</string>
