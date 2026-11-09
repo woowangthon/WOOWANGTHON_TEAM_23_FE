@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.WindowInsets
 import android.view.WindowManager
+import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.TextView
 import com.woowang.scrollmate.data.Question
@@ -70,7 +71,18 @@ class CardOverlay(
         windowManager.addView(root, params)
     }
 
-    fun remove() = windowManager.removeView(root)
+    fun remove() {
+        hideKeyboard()
+        windowManager.removeView(root)
+    }
+
+    // 창을 지우기 전에 키보드를 내리지 않으면 카드가 닫힌 뒤에도 키보드가 한참 남음 (FE #28)
+    private fun hideKeyboard() {
+        val input = root.findViewById<View>(R.id.card_input) ?: return
+        input.clearFocus()
+        themed.getSystemService(InputMethodManager::class.java)
+            .hideSoftInputFromWindow(input.windowToken, 0)
+    }
 
     private fun liftAboveKeyboard() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) return
