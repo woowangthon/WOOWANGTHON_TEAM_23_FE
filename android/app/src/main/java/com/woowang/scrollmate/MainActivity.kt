@@ -13,7 +13,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import com.woowang.scrollmate.domain.SUPPORTED_MIME_TYPES
 import com.woowang.scrollmate.ui.AccessibilityGuideScreen
-import com.woowang.scrollmate.ui.HomeScreen
+import com.woowang.scrollmate.ui.HomeRoute
 import com.woowang.scrollmate.ui.ScrollMateTheme
 import com.woowang.scrollmate.ui.UploadFlow
 
@@ -45,7 +45,7 @@ class MainActivity : ComponentActivity() {
                         },
                     )
                 } else {
-                    HomeScreen(
+                    HomeRoute(
                         onUploadClick = { picker.launch(SUPPORTED_MIME_TYPES) },
                         onGuideClick = { guideRequested = true },
                     )
