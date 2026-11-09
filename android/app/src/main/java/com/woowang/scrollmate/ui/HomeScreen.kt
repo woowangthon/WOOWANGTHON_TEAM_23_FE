@@ -28,6 +28,8 @@ import com.woowang.scrollmate.domain.SubjectCard
 fun HomeScreen(
     cards: List<SubjectCard>,
     onToggleEnabled: (SubjectCard, Boolean) -> Unit,
+    onAddSubject: () -> Unit,
+    onEditSubject: (SubjectCard) -> Unit,
     onUploadClick: () -> Unit,
     onGuideClick: () -> Unit,
 ) {
@@ -50,10 +52,19 @@ fun HomeScreen(
             }
         }
         item {
-            Text(
-                text = stringResource(R.string.home_subjects_title),
-                style = MaterialTheme.typography.titleMedium,
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text(
+                    text = stringResource(R.string.home_subjects_title),
+                    style = MaterialTheme.typography.titleMedium,
+                )
+                TextButton(onClick = onAddSubject) {
+                    Text(stringResource(R.string.subject_add))
+                }
+            }
         }
         if (cards.isEmpty()) {
             item {
@@ -64,7 +75,7 @@ fun HomeScreen(
             }
         } else {
             items(cards, key = { it.subject?.id ?: UNCLASSIFIED_KEY }) { card ->
-                SubjectCardItem(card, onToggleEnabled)
+                SubjectCardItem(card, onToggleEnabled, onEditSubject)
             }
         }
         item {
@@ -96,37 +107,53 @@ private fun TodayMessageCard() {
     }
 }
 
+// 눌러서 이름과 시험일을 고침. 학습 주제가 없는 자료를 모은 미분류 카드는 고칠 대상이 없음
 @Composable
-private fun SubjectCardItem(card: SubjectCard, onToggleEnabled: (SubjectCard, Boolean) -> Unit) {
+private fun SubjectCardItem(
+    card: SubjectCard,
+    onToggleEnabled: (SubjectCard, Boolean) -> Unit,
+    onEdit: (SubjectCard) -> Unit,
+) {
+    if (card.subject != null) {
+        Card(onClick = { onEdit(card) }, modifier = Modifier.fillMaxWidth()) {
+            SubjectCardRow(card, onToggleEnabled)
+        }
+    } else {
+        Card(modifier = Modifier.fillMaxWidth()) {
+            SubjectCardRow(card, onToggleEnabled)
+        }
+    }
+}
+
+@Composable
+private fun SubjectCardRow(card: SubjectCard, onToggleEnabled: (SubjectCard, Boolean) -> Unit) {
     val subject = card.subject
-    Card(modifier = Modifier.fillMaxWidth()) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(dimensionResource(R.dimen.sheet_padding)),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.sheet_spacing)),
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = subject?.name ?: stringResource(R.string.subject_unclassified),
-                    style = MaterialTheme.typography.titleMedium,
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(dimensionResource(R.dimen.sheet_padding)),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.sheet_spacing)),
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = subject?.name ?: stringResource(R.string.subject_unclassified),
+                style = MaterialTheme.typography.titleMedium,
+            )
+            Text(
+                text = stringResource(R.string.home_materials_count, card.materialCount),
+                style = MaterialTheme.typography.bodyMedium,
+            )
+            card.daysLeft?.let { Text(text = daysLeftText(it), style = MaterialTheme.typography.bodyMedium) }
+        }
+        // 학습 주제가 없는 자료(미분류)는 켜고 끌 대상이 없음
+        if (subject != null) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(text = stringResource(R.string.home_enabled_label), style = MaterialTheme.typography.bodySmall)
+                Switch(
+                    checked = subject.enabled,
+                    onCheckedChange = { onToggleEnabled(card, it) },
                 )
-                Text(
-                    text = stringResource(R.string.home_materials_count, card.materialCount),
-                    style = MaterialTheme.typography.bodyMedium,
-                )
-                card.daysLeft?.let { Text(text = daysLeftText(it), style = MaterialTheme.typography.bodyMedium) }
-            }
-            // 학습 주제가 없는 자료(미분류)는 켜고 끌 대상이 없음
-            if (subject != null) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(text = stringResource(R.string.home_enabled_label), style = MaterialTheme.typography.bodySmall)
-                    Switch(
-                        checked = subject.enabled,
-                        onCheckedChange = { onToggleEnabled(card, it) },
-                    )
-                }
             }
         }
     }
