@@ -11,6 +11,7 @@ import com.woowang.scrollmate.data.loadDevQuestions
 import com.woowang.scrollmate.data.MaterialRepository
 import com.woowang.scrollmate.data.PrefsSyncState
 import com.woowang.scrollmate.net.ApiClient
+import com.woowang.scrollmate.sync.SyncScheduler
 
 private const val DATABASE_NAME = "scrollmate.db"
 
@@ -48,4 +49,9 @@ class AppContainer(context: Context) {
 
 class ScrollMateApp : Application() {
     val container: AppContainer by lazy { AppContainer(this) }
+
+    override fun onCreate() {
+        super.onCreate()
+        SyncScheduler.start(this)
+    }
 }
