@@ -11,6 +11,7 @@ import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import com.woowang.scrollmate.ScrollMateApp
 import com.woowang.scrollmate.net.UploadFile
+import com.woowang.scrollmate.sync.SyncScheduler
 import java.io.File
 import java.util.concurrent.TimeUnit
 
@@ -42,6 +43,7 @@ class UploadWorker(context: Context, params: WorkerParameters) : CoroutineWorker
         return when (UploadExecutor(repository).run(files, subjectId)) {
             UploadOutcome.Success -> {
                 deleteCached(paths)
+                SyncScheduler.afterUpload(applicationContext)
                 Result.success()
             }
             UploadOutcome.Retry ->
