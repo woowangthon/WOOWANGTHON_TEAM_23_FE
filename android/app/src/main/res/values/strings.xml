@@ -37,7 +37,8 @@
 
     <string name="upload_failed_unsupported">%1$s: 글자를 읽지 못했어요. 스캔본이나 사진이 아니라 글자가 선택되는 PDF나 PPTX로 올려 주세요</string>
     <string name="upload_failed_too_large">%1$s: 파일이 너무 커요. 파일당 %2$dMB, 100쪽 이하로 나눠서 올려 주세요</string>
-    <string name="upload_failed_rate_limited">%1$s: 오늘 올릴 수 있는 한도를 넘었어요. 내일 다시 올려 주세요</string>
+    <string name="upload_failed_rate_limited">%1$s: 오늘 올릴 수 있는 한도를 넘었거나 서버에 대기가 많아요. 잠시 뒤나 내일 다시 올려 주세요</string>
+    <string name="upload_failed_also_not_uploaded">함께 올린 %1$s도 올라가지 않았어요. 문제가 된 파일을 빼고 다시 올려 주세요</string>
     <string name="upload_failed_network">%1$s: 서버가 바쁘거나 연결이 불안정해서 올리지 못했어요. 연결을 확인하고 잠시 뒤 다시 올려 주세요</string>
     <string name="upload_failed_other">%1$s: 올리지 못했어요. 잠시 뒤 다시 올려 보세요</string>
 

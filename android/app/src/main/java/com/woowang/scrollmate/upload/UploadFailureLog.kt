@@ -22,8 +22,8 @@ class UploadFailureLog(context: Context) {
     val failures: StateFlow<List<UploadFailure>> = _failures
 
     @Synchronized
-    fun record(fileNames: List<String>, reason: UploadFailureReason) {
-        val entry = UploadFailure(id = System.currentTimeMillis(), fileNames = fileNames, reason = reason)
+    fun record(fileNames: List<String>, reason: UploadFailureReason, alsoNotUploaded: List<String> = emptyList()) {
+        val entry = UploadFailure(System.currentTimeMillis(), fileNames, reason, alsoNotUploaded)
         save((listOf(entry) + _failures.value).take(MAX_FAILURES))
     }
 

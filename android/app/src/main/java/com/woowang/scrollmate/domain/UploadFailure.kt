@@ -33,9 +33,19 @@ fun uploadFailureReason(code: String): UploadFailureReason = when (code) {
 @Serializable
 data class UploadFailure(
     val id: Long,
+    // 이유에 해당하는 파일. 어느 파일인지 알 수 없으면 함께 올린 파일 전부
     val fileNames: List<String>,
     val reason: UploadFailureReason,
+    // 문제는 없었지만 같은 요청에 있어서 함께 올라가지 못한 파일
+    val alsoNotUploaded: List<String> = emptyList(),
 )
+
+// 서버는 여러 파일 중 하나만 문제여도 요청 전체를 거절하고, 설명에 문제가 된 파일 이름을 넣음.
+// 설명에 이름이 나온 파일과 나머지를 나눔. 이름을 찾지 못하면 전부를 문제 파일로 봄
+fun splitFailedFiles(allNames: List<String>, serverMessage: String): Pair<List<String>, List<String>> {
+    val (blamed, others) = allNames.partition { it.isNotBlank() && serverMessage.contains(it) }
+    return if (blamed.isEmpty()) allNames to emptyList() else blamed to others
+}
 
 private val json = Json { ignoreUnknownKeys = true }
 

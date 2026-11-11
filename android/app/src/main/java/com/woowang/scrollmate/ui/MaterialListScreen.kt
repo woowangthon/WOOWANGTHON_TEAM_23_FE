@@ -101,6 +101,14 @@ private fun FailureCard(failure: UploadFailure, onDismiss: () -> Unit) {
 @Composable
 private fun failureMessage(failure: UploadFailure): String {
     val names = failure.fileNames.joinToString()
+    val message = reasonMessage(failure, names)
+    val others = failure.alsoNotUploaded
+    if (others.isEmpty()) return message
+    return message + "\n" + stringResource(R.string.upload_failed_also_not_uploaded, others.joinToString())
+}
+
+@Composable
+private fun reasonMessage(failure: UploadFailure, names: String): String {
     return when (failure.reason) {
         UploadFailureReason.UNSUPPORTED_FILE -> stringResource(R.string.upload_failed_unsupported, names)
         UploadFailureReason.FILE_TOO_LARGE ->

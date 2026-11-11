@@ -11,6 +11,7 @@ import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import com.woowang.scrollmate.ScrollMateApp
 import com.woowang.scrollmate.domain.UploadFailureReason
+import com.woowang.scrollmate.domain.splitFailedFiles
 import com.woowang.scrollmate.domain.uploadFailureReason
 import com.woowang.scrollmate.net.UploadFile
 import com.woowang.scrollmate.sync.SyncScheduler
@@ -59,7 +60,12 @@ class UploadWorker(context: Context, params: WorkerParameters) : CoroutineWorker
                 }
             is UploadOutcome.Failed -> {
                 deleteCached(paths)
-                container.uploadFailures.record(names.toList(), uploadFailureReason(outcome.code))
+                val reason = uploadFailureReason(outcome.code)
+                // 파일 자체가 문제인 경우에만 어느 파일인지 나눠 알려 줌
+                val fileProblem = reason == UploadFailureReason.UNSUPPORTED_FILE || reason == UploadFailureReason.FILE_TOO_LARGE
+                val (blamed, others) =
+                    if (fileProblem) splitFailedFiles(names.toList(), outcome.message) else names.toList() to emptyList()
+                container.uploadFailures.record(blamed, reason, others)
                 Result.failure()
             }
         }
