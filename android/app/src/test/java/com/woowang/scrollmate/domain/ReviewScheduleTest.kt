@@ -70,16 +70,26 @@ class ReviewScheduleTest {
     }
 
     @Test
-    fun skippedBetweenCorrectsDoesNotCountAsAMiss() {
-        // 틀린 뒤 맞히고, 건너뛴 다음 다시 맞힘: 맞힌 횟수는 2번
+    fun skippedThenCorrectIsReviewedLikeAWrongAnswer() {
+        // 건너뛴 뒤 맞히면 바로 끝나지 않고 3일 뒤에 다시 냄
+        val waiting = listOf(at(AnswerResult.SKIPPED, 5), at(AnswerResult.CORRECT, 2))
+        val due = listOf(at(AnswerResult.SKIPPED, 5), at(AnswerResult.CORRECT, 3))
+
+        assertEquals(ReviewStatus.WAITING, reviewStatus(waiting, now))
+        assertEquals(ReviewStatus.DUE, reviewStatus(due, now))
+    }
+
+    @Test
+    fun skippingAfterCorrectStartsOver() {
+        // 틀린 뒤 맞히고, 건너뛴 다음 다시 맞힘: 건너뛴 뒤로 맞힌 횟수는 1번이라 3일 간격
         val records = listOf(
             at(AnswerResult.WRONG, 30),
             at(AnswerResult.CORRECT, 20),
             at(AnswerResult.SKIPPED, 15),
-            at(AnswerResult.CORRECT, 8),
+            at(AnswerResult.CORRECT, 2),
         )
 
-        assertEquals(ReviewStatus.DUE, reviewStatus(records, now))
+        assertEquals(ReviewStatus.WAITING, reviewStatus(records, now))
     }
 
     @Test
