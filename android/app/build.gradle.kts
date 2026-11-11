@@ -15,9 +15,21 @@ android {
         targetSdk = 37
         versionCode = 1
         versionName = "0.1.0"
+    }
 
-        val apiBaseUrl = providers.gradleProperty("apiBaseUrl").get()
-        buildConfigField("String", "API_BASE_URL", "\"$apiBaseUrl\"")
+    buildTypes {
+        // 디버그 빌드는 개발 서버(기본값은 에뮬레이터에서 PC를 가리키는 주소)에 붙음
+        debug {
+            val apiBaseUrl = providers.gradleProperty("apiBaseUrl").get()
+            buildConfigField("String", "API_BASE_URL", "\"$apiBaseUrl\"")
+        }
+        // 릴리스 빌드(제출용 APK)는 배포 서버에 붙음. 릴리스 빌드는 http를 허용하지 않으므로 https 주소여야 함
+        release {
+            val releaseApiBaseUrl = providers.gradleProperty("releaseApiBaseUrl").get()
+            buildConfigField("String", "API_BASE_URL", "\"$releaseApiBaseUrl\"")
+            // 제출용 APK를 바로 설치할 수 있게 디버그 키로 서명함. 스토어 배포용 키가 아님
+            signingConfig = signingConfigs.getByName("debug")
+        }
     }
 
     buildFeatures {
