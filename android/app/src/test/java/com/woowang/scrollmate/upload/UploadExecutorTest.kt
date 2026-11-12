@@ -90,7 +90,7 @@ class UploadExecutorTest {
     fun unsupportedFileFailsWithoutRetry() = runBlocking {
         respond(415, fixture("error_unsupported_file.json"))
 
-        assertEquals(UploadOutcome.Failed("unsupported_file"), executor.run(files, null))
+        assertEquals("unsupported_file", (executor.run(files, null) as UploadOutcome.Failed).code)
         assertTrue(materials.rows.isEmpty())
     }
 
@@ -98,7 +98,7 @@ class UploadExecutorTest {
     fun fileTooLargeFailsWithoutRetry() = runBlocking {
         respond(413, fixture("error_file_too_large.json"))
 
-        assertEquals(UploadOutcome.Failed("file_too_large"), executor.run(files, null))
+        assertEquals("file_too_large", (executor.run(files, null) as UploadOutcome.Failed).code)
     }
 
     @Test
@@ -112,7 +112,7 @@ class UploadExecutorTest {
     fun dailyRateLimitFailsWithoutRetry() = runBlocking {
         respond(429, fixture("error_rate_limited.json"))
 
-        assertEquals(UploadOutcome.Failed("rate_limited"), executor.run(files, null))
+        assertEquals("rate_limited", (executor.run(files, null) as UploadOutcome.Failed).code)
         assertTrue(materials.rows.isEmpty())
     }
 

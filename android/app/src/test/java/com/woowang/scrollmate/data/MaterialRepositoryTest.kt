@@ -231,14 +231,45 @@ class MaterialRepositoryTest {
     @Test
     fun failedDeleteKeepsLocalMaterial() {
         materials.rows["m_001"] = Material("m_001", "운영체제.pdf")
-        respond(404, """{ "error": { "code": "not_found", "message": "없는 자료" } }""")
+        respond(502, fixture("error_llm_unavailable.json"))
 
         try {
             runBlocking { repository.delete("m_001") }
             fail("ApiException expected")
         } catch (e: ApiException) {
-            assertEquals(404, e.httpStatus)
+            assertEquals(502, e.httpStatus)
         }
         assertTrue("m_001" in materials.rows)
+    }
+
+    @Test
+    fun deleteRemovesLocalMaterialThatServerAlreadyLost() = runBlocking {
+        materials.rows["m_001"] = Material("m_001", "운영체제.pdf")
+        respond(404, """{ "error": { "code": "not_found", "message": "없는 자료" } }""")
+
+        repository.delete("m_001")
+
+        assertTrue(materials.rows.isEmpty())
+    }
+
+    @Test
+    fun refreshKeepsServerProgressInMemory() = runBlocking {
+        respond(200, fixture("materials_list.json"))
+
+        repository.refreshMaterials()
+
+        assertEquals(MaterialProgress(done = 4, total = 12), repository.progress.value["m_001"])
+        assertEquals(MaterialProgress(done = 6, total = 6), repository.progress.value["m_002"])
+    }
+
+    @Test
+    fun refreshDropsProgressOfMaterialsTheServerNoLongerHas() = runBlocking {
+        respond(200, fixture("materials_list.json"))
+        repository.refreshMaterials()
+        respond(200, """{ "materials": [] }""")
+
+        repository.refreshMaterials()
+
+        assertTrue(repository.progress.value.isEmpty())
     }
 }

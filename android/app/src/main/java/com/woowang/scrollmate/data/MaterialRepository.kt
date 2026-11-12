@@ -1,8 +1,16 @@
 package com.woowang.scrollmate.data
 
 import com.woowang.scrollmate.net.ApiClient
+import com.woowang.scrollmate.net.ApiException
 import com.woowang.scrollmate.net.UploadFile
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+
+private const val HTTP_NOT_FOUND = 404
+
+// 문제 생성 진행. 끝난 조각 수와 전체 조각 수
+data class MaterialProgress(val done: Int, val total: Int)
 
 // 자료 업로드와 서버 동기화. 과목 연결은 기기에만 있으므로 서버에서 받은 자료에도 기존 연결을 유지함
 class MaterialRepository(
@@ -11,6 +19,11 @@ class MaterialRepository(
     private val questions: QuestionDao,
     private val syncState: SyncState,
 ) {
+    // 서버가 알려 준 문제 생성 진행(끝난 조각 / 전체 조각). Room 스키마를 바꾸지 않으려고 저장하지 않고,
+    // 새로고침할 때마다 메모리에 담음. 앱을 다시 켜면 첫 동기화 때 채워짐
+    private val _progress = MutableStateFlow<Map<String, MaterialProgress>>(emptyMap())
+    val progress: StateFlow<Map<String, MaterialProgress>> = _progress
+
     fun observeMaterials(): Flow<List<Material>> = materials.observeAll()
 
     // 한 번에 올리는 파일은 모두 같은 과목에 넣으므로 응답의 자료 순서와 상관없이 연결할 수 있음
@@ -21,6 +34,7 @@ class MaterialRepository(
 
     suspend fun refreshMaterials() {
         val remote = api.listMaterials()
+        _progress.value = remote.associate { it.id to MaterialProgress(done = it.chunksDone, total = it.chunksTotal) }
         val localById = materials.getAll().associateBy { it.id }
         materials.upsertAll(remote.map { it.toEntity(localById[it.id]?.subjectId) })
 
@@ -48,8 +62,14 @@ class MaterialRepository(
     suspend fun hasProcessingMaterials(): Boolean =
         materials.getAll().any { it.status == MaterialStatus.PROCESSING }
 
+    // 서버에서 지운 뒤 기기에서도 지움. 서버에 이미 없는 자료(404)는 기기에만 남은 것이므로 기기에서 지움.
+    // 그 밖의 오류는 기기에 그대로 두고 던짐
     suspend fun delete(materialId: String) {
-        api.deleteMaterial(materialId)
+        try {
+            api.deleteMaterial(materialId)
+        } catch (e: ApiException) {
+            if (e.httpStatus != HTTP_NOT_FOUND) throw e
+        }
         materials.delete(materialId)
     }
 }
