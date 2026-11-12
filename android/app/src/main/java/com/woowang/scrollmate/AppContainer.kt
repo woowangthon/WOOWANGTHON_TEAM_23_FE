@@ -35,6 +35,7 @@ class AppContainer(context: Context) {
     val cardQuestionSource = CardQuestionSource(
         subjects = database.subjectDao(),
         questions = database.questionDao(),
+        answers = database.answerRecordDao(),
     )
 
     // 개발용 샘플 문제. 디버그 빌드에만 있고 DB에는 넣지 않음
