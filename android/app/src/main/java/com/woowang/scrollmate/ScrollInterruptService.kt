@@ -10,7 +10,6 @@ import android.util.Log
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
-import android.widget.Toast
 import com.woowang.scrollmate.data.AnswerRecord
 import com.woowang.scrollmate.data.AnswerResult
 import com.woowang.scrollmate.data.DEV_MATERIAL_ID
@@ -144,18 +143,14 @@ class ScrollInterruptService : AccessibilityService() {
             .also { it.show() }
     }
 
-    // input이 null이면 건너뜀
+    // input이 null이면 건너뜀. 답했으면 결과를 카드 안에서 보여 주고 닫으며, 건너뛰면 바로 닫음
     private fun dismissCard(question: Question, input: String?) {
         val result = if (input == null) AnswerResult.SKIPPED else grade(question, input)
-        Log.i(TAG, "card dismissed question=${question.id} result=$result")
-        card?.remove()
-        card = null
-        audioManager.abandonAudioFocusRequest(audioFocus)
-
+        Log.i(TAG, "card answered question=${question.id} result=$result")
         when (result) {
-            AnswerResult.CORRECT -> toast(getString(R.string.card_correct))
-            AnswerResult.WRONG -> toast(getString(R.string.card_wrong, question.answer))
-            AnswerResult.SKIPPED -> Unit
+            AnswerResult.CORRECT -> card?.showResult(getString(R.string.card_correct), ::closeCard)
+            AnswerResult.WRONG -> card?.showResult(getString(R.string.card_wrong, question.answer), ::closeCard)
+            AnswerResult.SKIPPED -> closeCard()
         }
         // 개발용 샘플 문제는 DB에 없으므로 기록하지 않음
         if (question.materialId != DEV_MATERIAL_ID) {
@@ -171,5 +166,11 @@ class ScrollInterruptService : AccessibilityService() {
         }
     }
 
-    private fun toast(message: String) = Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+    private fun closeCard() {
+        if (card == null) return
+        Log.i(TAG, "card closed")
+        card?.remove()
+        card = null
+        audioManager.abandonAudioFocusRequest(audioFocus)
+    }
 }
