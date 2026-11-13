@@ -39,6 +39,14 @@
             android:layout_height="wrap_content"
             android:text="@string/card_skip" />
 
+        <ImageView
+            android:id="@+id/card_result_icon"
+            android:layout_width="@dimen/card_result_icon_size"
+            android:layout_height="@dimen/card_result_icon_size"
+            android:layout_gravity="center_horizontal"
+            android:importantForAccessibility="no"
+            android:visibility="gone" />
+
         <TextView
             android:id="@+id/card_result"
             android:layout_width="match_parent"
@@ -46,6 +54,14 @@
             android:textColor="@color/card_text"
             android:textSize="@dimen/card_text_size"
             android:textStyle="bold"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/card_result_detail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/card_text"
+            android:textSize="@dimen/card_text_size"
             android:visibility="gone" />
 
         <Button

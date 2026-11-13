@@ -147,10 +147,10 @@ class ScrollInterruptService : AccessibilityService() {
     private fun dismissCard(question: Question, input: String?) {
         val result = if (input == null) AnswerResult.SKIPPED else grade(question, input)
         Log.i(TAG, "card answered question=${question.id} result=$result")
-        when (result) {
-            AnswerResult.CORRECT -> card?.showResult(getString(R.string.card_correct), ::closeCard)
-            AnswerResult.WRONG -> card?.showResult(getString(R.string.card_wrong, question.answer), ::closeCard)
-            AnswerResult.SKIPPED -> closeCard()
+        if (input == null) {
+            closeCard()
+        } else {
+            card?.showResult(result, input, question.answer, ::closeCard)
         }
         // 개발용 샘플 문제는 DB에 없으므로 기록하지 않음
         if (question.materialId != DEV_MATERIAL_ID) {

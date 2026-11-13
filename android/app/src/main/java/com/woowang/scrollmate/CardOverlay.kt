@@ -8,12 +8,16 @@ import android.os.Looper
 import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.WindowInsets
 import android.view.WindowManager
+import android.view.animation.OvershootInterpolator
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.TextView
+import com.woowang.scrollmate.data.AnswerResult
 import com.woowang.scrollmate.data.Question
 import com.woowang.scrollmate.data.QuestionType
 
@@ -28,6 +32,11 @@ private val RESULT_HIDDEN_VIEW_IDS = listOf(
 
 // 결과를 읽을 시간. 확인을 누르지 않아도 이 시간이 지나면 닫힘. 임의로 정한 값
 private const val RESULT_AUTO_CLOSE_MS = 4000L
+
+// 카드가 나타나고 결과 아이콘이 튀어 오르는 시간과 시작 크기. 보기 좋게 임의로 정한 값
+private const val ENTER_MS = 180L
+private const val ENTER_START_SCALE = 0.92f
+private const val ICON_POP_MS = 350L
 
 // 쇼츠 위에 띄우는 문제 카드. 문제 유형마다 레이아웃이 다름 (card_ox, card_short).
 // 답하면 onAnswer가 불리고, 건너뛰면 null이 넘어감
@@ -85,15 +94,46 @@ class CardOverlay(
             WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
         }
         windowManager.addView(root, params)
+        // 카드가 살짝 커지며 나타남
+        (root as ViewGroup).getChildAt(0).apply {
+            alpha = 0f
+            scaleX = ENTER_START_SCALE
+            scaleY = ENTER_START_SCALE
+            animate().alpha(1f).scaleX(1f).scaleY(1f).setDuration(ENTER_MS).start()
+        }
     }
 
     // 답한 뒤 카드 안에서 결과를 보여 줌. 토스트는 앱 알림이 꺼져 있으면 시스템이 막아 보이지 않음 (FE #42).
     // 입력 부분을 결과 문구와 확인 버튼으로 바꾸고, 확인을 누르거나 일정 시간이 지나면 onClose를 부름
-    fun showResult(message: String, onClose: () -> Unit) {
+    // 맞으면 내 답을, 틀리면 내 답과 정답을 나란히 보여 줌
+    fun showResult(result: AnswerResult, myAnswer: String, correctAnswer: String, onClose: () -> Unit) {
         hideKeyboard()
         RESULT_HIDDEN_VIEW_IDS.forEach { root.findViewById<View>(it)?.visibility = View.GONE }
+        val correct = result == AnswerResult.CORRECT
+        val myAnswerText = if (myAnswer.isBlank()) {
+            themed.getString(R.string.card_my_answer_empty)
+        } else {
+            themed.getString(R.string.card_my_answer, myAnswer.trim())
+        }
+        root.findViewById<ImageView>(R.id.card_result_icon).apply {
+            setImageResource(if (correct) R.drawable.ic_card_correct else R.drawable.ic_card_wrong)
+            visibility = View.VISIBLE
+            // 결과 아이콘이 살짝 튀어 오르며 나타남
+            scaleX = 0f
+            scaleY = 0f
+            animate().scaleX(1f).scaleY(1f).setDuration(ICON_POP_MS)
+                .setInterpolator(OvershootInterpolator()).start()
+        }
         root.findViewById<TextView>(R.id.card_result).apply {
-            text = message
+            text = themed.getString(if (correct) R.string.card_correct else R.string.card_wrong)
+            visibility = View.VISIBLE
+        }
+        root.findViewById<TextView>(R.id.card_result_detail).apply {
+            text = if (correct) {
+                myAnswerText
+            } else {
+                myAnswerText + "\n" + themed.getString(R.string.card_correct_answer, correctAnswer)
+            }
             visibility = View.VISIBLE
         }
         root.findViewById<View>(R.id.card_confirm).apply {
