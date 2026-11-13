@@ -28,6 +28,7 @@ private class FakeCardQuestionDao(private val bySubject: Map<Long?, List<Questio
 private class FakeAnswerRecordDao(private val records: List<AnswerRecord>) : AnswerRecordDao {
     override suspend fun insert(record: AnswerRecord): Long = error("unused")
     override suspend fun recordsOfSubject(subjectId: Long?): List<AnswerRecord> = records
+    override suspend fun getAll(): List<AnswerRecord> = records
 }
 
 private fun question(id: String) = Question(id, "m", QuestionType.OX, "문장", "O", emptyList(), "근거")

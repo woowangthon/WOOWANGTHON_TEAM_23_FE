@@ -47,6 +47,12 @@ private class FakeSyncState : SyncState {
     override var lastQuestionSync: String? = null
 }
 
+private class FakeAnswerDao(val records: MutableList<AnswerRecord> = mutableListOf()) : AnswerRecordDao {
+    override suspend fun insert(record: AnswerRecord): Long = error("unused")
+    override suspend fun recordsOfSubject(subjectId: Long?): List<AnswerRecord> = emptyList()
+    override suspend fun getAll(): List<AnswerRecord> = records
+}
+
 class MaterialRepositoryTest {
     private lateinit var server: MockWebServer
     private lateinit var materials: FakeMaterialDao
@@ -270,5 +276,67 @@ class MaterialRepositoryTest {
         repository.refreshMaterials()
 
         assertTrue(repository.progress.value.isEmpty())
+    }
+
+    private fun repositoryWith(answers: FakeAnswerDao): MaterialRepository {
+        val api = ApiClient(server.url("/").toString(), deviceId = { "device-test-id" })
+        return MaterialRepository(api, materials, questions, syncState, answers)
+    }
+
+    private fun record(id: Int, result: AnswerResult = AnswerResult.WRONG) =
+        AnswerRecord(id.toLong(), "q_$id", result, "2026-11-13T10:00:00+09:00")
+
+    @Test
+    fun syncSendsAnswerRecordsBeforeFetchingQuestions() = runBlocking {
+        val answers = FakeAnswerDao(mutableListOf(record(1, AnswerResult.CORRECT), record(2, AnswerResult.SKIPPED)))
+        respond(200, """{ "recorded": 2 }""")
+        respond(200, fixture("materials_list.json"))
+        respond(200, fixture("questions.json"))
+
+        repositoryWith(answers).syncQuestions()
+
+        val first = server.takeRequest()
+        assertEquals("/api/v1/answers", first.path)
+        val body = first.body.readUtf8()
+        assertTrue(body.contains(""""questionId":"q_1""""))
+        assertTrue(body.contains(""""result":"correct""""))
+        assertTrue(body.contains(""""result":"skipped""""))
+        assertTrue(body.contains(""""answeredAt":"2026-11-13T10:00:00+09:00""""))
+        assertEquals(setOf("q_001", "q_002"), questions.rows.keys)
+    }
+
+    @Test
+    fun syncSplitsAnswerRecordsIntoRequestsOf200() = runBlocking {
+        val answers = FakeAnswerDao((1..201).map { record(it) }.toMutableList())
+        respond(200, """{ "recorded": 200 }""")
+        respond(200, """{ "recorded": 1 }""")
+
+        repositoryWith(answers).sendAnswers()
+
+        assertEquals(2, server.requestCount)
+        assertTrue(server.takeRequest().body.readUtf8().split(""""questionId"""").size - 1 == 200)
+        assertTrue(server.takeRequest().body.readUtf8().split(""""questionId"""").size - 1 == 1)
+    }
+
+    @Test
+    fun syncSendsNothingWhenThereAreNoAnswerRecords() = runBlocking {
+        respond(200, fixture("materials_list.json"))
+        respond(200, fixture("questions.json"))
+
+        repositoryWith(FakeAnswerDao()).syncQuestions()
+
+        assertEquals("/api/v1/materials", server.takeRequest().path)
+    }
+
+    @Test
+    fun rejectedAnswerRecordsDoNotBlockQuestionSync() = runBlocking {
+        val answers = FakeAnswerDao(mutableListOf(record(1)))
+        respond(400, """{ "error": { "code": "invalid_request", "message": "bad" } }""")
+        respond(200, fixture("materials_list.json"))
+        respond(200, fixture("questions.json"))
+
+        repositoryWith(answers).syncQuestions()
+
+        assertEquals(setOf("q_001", "q_002"), questions.rows.keys)
     }
 }
