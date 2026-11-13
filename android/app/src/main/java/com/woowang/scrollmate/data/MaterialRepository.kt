@@ -1,5 +1,6 @@
 package com.woowang.scrollmate.data
 
+import com.woowang.scrollmate.net.AnswerDto
 import com.woowang.scrollmate.net.ApiClient
 import com.woowang.scrollmate.net.ApiException
 import com.woowang.scrollmate.net.UploadFile
@@ -8,6 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 private const val HTTP_NOT_FOUND = 404
+private const val ANSWERS_PER_REQUEST = 200
 
 // 문제 생성 진행. 끝난 조각 수와 전체 조각 수
 data class MaterialProgress(val done: Int, val total: Int)
@@ -18,6 +20,8 @@ class MaterialRepository(
     private val materials: MaterialDao,
     private val questions: QuestionDao,
     private val syncState: SyncState,
+    // 풀이 기록을 서버로 보낼 때 씀. null이면 보내지 않음
+    private val answers: AnswerRecordDao? = null,
 ) {
     // 서버가 알려 준 문제 생성 진행(끝난 조각 / 전체 조각). Room 스키마를 바꾸지 않으려고 저장하지 않고,
     // 새로고침할 때마다 메모리에 담음. 앱을 다시 켜면 첫 동기화 때 채워짐
@@ -43,7 +47,22 @@ class MaterialRepository(
         localById.keys.filterNot { it in remoteIds }.forEach { materials.delete(it) }
     }
 
+    // 풀이 기록을 서버로 보냄. 서버는 이 기록을 받아야 안 푼 문제가 모자란 자료에 새 문제를 채움 (FE #45).
+    // 같은 기록(questionId, answeredAt)은 서버가 한 번만 받으므로 전체를 다시 보내도 됨. 한 번에 200개까지.
+    // 서버가 기록을 거절해도(4xx) 문제 받기는 막지 않도록 서버 오류는 넘어가고, 네트워크 오류는 그대로 던짐
+    suspend fun sendAnswers() {
+        val records = answers?.getAll().orEmpty()
+        try {
+            records.chunked(ANSWERS_PER_REQUEST).forEach { chunk ->
+                api.postAnswers(chunk.map { AnswerDto(it.questionId, it.result.name.lowercase(), it.answeredAt) })
+            }
+        } catch (e: ApiException) {
+            // 다음 동기화 때 다시 보냄
+        }
+    }
+
     suspend fun syncQuestions() {
+        sendAnswers()
         // 문제는 자료에 연결되므로 자료 목록을 먼저 최신으로 맞춤
         refreshMaterials()
         val response = api.getQuestions(since = syncState.lastQuestionSync)

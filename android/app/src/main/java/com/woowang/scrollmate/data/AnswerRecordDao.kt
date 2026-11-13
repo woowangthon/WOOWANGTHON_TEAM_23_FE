@@ -9,6 +9,10 @@ interface AnswerRecordDao {
     @Insert
     suspend fun insert(record: AnswerRecord): Long
 
+    // 서버로 보낼 풀이 기록 전부
+    @Query("SELECT * FROM answer_record ORDER BY id")
+    suspend fun getAll(): List<AnswerRecord>
+
     // 한 학습 주제(null = 미분류)의 문제들에 대한 풀이 기록 전부. 다시 낼 문제를 정하는 데 씀
     @Query(
         """

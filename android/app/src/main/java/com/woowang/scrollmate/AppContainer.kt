@@ -49,6 +49,7 @@ class AppContainer(context: Context) {
         materials = database.materialDao(),
         questions = database.questionDao(),
         syncState = PrefsSyncState(context),
+        answers = database.answerRecordDao(),
     )
 }
 
