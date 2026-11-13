@@ -68,6 +68,10 @@ fun UploadSheet(
                 text = stringResource(R.string.upload_pdf_hint),
                 style = MaterialTheme.typography.bodySmall,
             )
+            Text(
+                text = stringResource(R.string.upload_notice),
+                style = MaterialTheme.typography.bodySmall,
+            )
 
             Text(text = stringResource(R.string.upload_subject_label), style = MaterialTheme.typography.titleSmall)
             Row(
