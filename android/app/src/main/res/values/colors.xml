@@ -4,4 +4,6 @@
     <color name="card_surface">#FFFFFFFF</color>
     <color name="card_text">#FF000000</color>
     <color name="card_hint">#FF888888</color>
+    <color name="card_correct">#FF2E7D32</color>
+    <color name="card_wrong">#FFC62828</color>
 </resources>

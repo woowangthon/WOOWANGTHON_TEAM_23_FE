@@ -68,7 +68,10 @@
     <string name="card_skip">건너뛰기</string>
     <string name="card_confirm">확인</string>
     <string name="card_correct">정답이에요</string>
-    <string name="card_wrong">아쉬워요. 정답: %1$s</string>
+    <string name="card_wrong">아쉬워요</string>
+    <string name="card_my_answer">내 답: %1$s</string>
+    <string name="card_my_answer_empty">내 답: 입력하지 않았어요</string>
+    <string name="card_correct_answer">정답: %1$s</string>
 
     <string name="guide_title">카드를 띄우려면 접근성 서비스를 켜 주세요</string>
     <string name="guide_enabled_title">접근성 서비스가 켜져 있어요</string>
