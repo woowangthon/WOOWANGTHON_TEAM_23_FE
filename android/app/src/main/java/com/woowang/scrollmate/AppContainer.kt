@@ -3,9 +3,11 @@ package com.woowang.scrollmate
 import android.app.Application
 import android.content.Context
 import androidx.room.Room
+import com.woowang.scrollmate.data.AdviceRepository
 import com.woowang.scrollmate.data.AppDatabase
 import com.woowang.scrollmate.data.CardQuestionSource
 import com.woowang.scrollmate.data.DeviceId
+import com.woowang.scrollmate.data.MIGRATION_1_2
 import com.woowang.scrollmate.data.Question
 import com.woowang.scrollmate.data.loadDevQuestions
 import com.woowang.scrollmate.data.MaterialRepository
@@ -25,6 +27,7 @@ class AppContainer(context: Context) {
     )
         // 시연 기간에는 스키마가 바뀌어도 앱이 멈추지 않게 기존 데이터를 지우고 다시 만듦.
         // 이 경우 기기에 저장된 문제와 풀이 기록이 사라지므로, 실제 배포 전에 마이그레이션으로 바꿔야 함
+        .addMigrations(MIGRATION_1_2)
         .fallbackToDestructiveMigration(dropAllTables = true)
         .build()
 
@@ -43,6 +46,8 @@ class AppContainer(context: Context) {
 
     // 백그라운드 업로드가 실패한 기록. 화면에서 이유를 알려 줄 때 씀
     val uploadFailures = UploadFailureLog(context)
+
+    val adviceRepository = AdviceRepository(context, api, database.watchSessionDao())
 
     val materialRepository = MaterialRepository(
         api = api,
