@@ -17,7 +17,12 @@ import java.time.LocalDate
 
 // 기기에 저장된 학습 주제와 자료를 읽어 홈 화면에 넘김. 학습 주제와 시험일은 기기 DB에만 저장하고 서버로 보내지 않음
 @Composable
-fun HomeRoute(onUploadClick: () -> Unit, onMaterialsClick: () -> Unit, onGuideClick: () -> Unit) {
+fun HomeRoute(
+    serviceEnabled: Boolean,
+    onUploadClick: () -> Unit,
+    onMaterialsClick: () -> Unit,
+    onGuideClick: () -> Unit,
+) {
     val container = (LocalContext.current.applicationContext as ScrollMateApp).container
     val subjectDao = container.database.subjectDao()
     val subjects by subjectDao.observeAll().collectAsState(initial = emptyList())
@@ -32,6 +37,7 @@ fun HomeRoute(onUploadClick: () -> Unit, onMaterialsClick: () -> Unit, onGuideCl
 
     HomeScreen(
         cards = cards,
+        serviceEnabled = serviceEnabled,
         onToggleEnabled = { card, enabled ->
             card.subject?.let { scope.launch { subjectDao.update(it.copy(enabled = enabled)) } }
         },

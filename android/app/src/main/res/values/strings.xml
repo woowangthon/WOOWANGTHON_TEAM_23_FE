@@ -12,7 +12,14 @@
     <string name="home_dday_past">시험일이 지났어요</string>
     <string name="home_enabled_label">문제 내기</string>
 
-    <string name="home_materials_button">올린 자료 보기</string>
+    <string name="home_materials_button">올린 자료</string>
+    <string name="home_materials_desc">문제 준비 상태를 확인해요</string>
+    <string name="home_tagline">쇼츠 넘기는 사이,\n한 문제씩 복습해요</string>
+    <string name="home_hero_body">공부할 PDF나 PPTX를 올리면 문제를 만들어 두고, 쇼츠를 볼 때 카드로 찾아가요</string>
+    <string name="home_service_on">카드 켜짐</string>
+    <string name="home_service_off">카드 꺼짐</string>
+    <string name="home_service_off_title">아직 카드가 쇼츠에 뜨지 않아요</string>
+    <string name="home_service_off_body">접근성 서비스를 켜면 쇼츠를 넘길 때 문제 카드가 나타나요. 눌러서 켜는 방법을 확인해요</string>
     <string name="home_upload_failed_banner">올리지 못한 자료가 %1$d건 있어요</string>
     <string name="home_upload_failed_action">눌러서 이유를 확인해요</string>
 
@@ -26,6 +33,9 @@
     <string name="materials_status_ready">문제가 준비됐어요</string>
     <string name="materials_status_failed">문제를 만들지 못했어요. 자료를 지우고 다시 올려 보세요</string>
     <string name="materials_question_count">문제 %1$d개</string>
+    <string name="materials_pill_processing">만드는 중</string>
+    <string name="materials_pill_ready">준비 완료</string>
+    <string name="materials_pill_failed">실패</string>
     <string name="materials_delete">삭제</string>
     <string name="materials_delete_confirm_title">%1$s 자료를 삭제할까요?</string>
     <string name="materials_delete_confirm_body">이 자료로 만든 문제와 풀이 기록도 함께 지워져요</string>
@@ -61,9 +71,11 @@
 
     <string name="card_o">O</string>
     <string name="card_x">X</string>
-    <string name="card_short_hint">단답 입력</string>
-    <string name="card_submit">제출</string>
-    <string name="card_skip">건너뛰기</string>
+    <string name="card_short_hint">정답을 입력해요</string>
+    <string name="card_type_ox">OX 퀴즈</string>
+    <string name="card_type_short">단답</string>
+    <string name="card_submit">제출하기</string>
+    <string name="card_skip">이번엔 건너뛸게요</string>
     <string name="card_confirm">확인</string>
     <string name="card_correct">정답이에요</string>
     <string name="card_wrong">아쉬워요</string>

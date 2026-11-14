@@ -12,7 +12,10 @@ import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.WindowInsets
 import android.view.WindowManager
+import android.view.animation.DecelerateInterpolator
+import android.view.animation.LinearInterpolator
 import android.view.animation.OvershootInterpolator
+import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.ImageView
@@ -23,8 +26,7 @@ import com.woowang.scrollmate.data.QuestionType
 
 // 결과를 보여 주는 동안 가리는 답하기 화면의 요소들
 private val RESULT_HIDDEN_VIEW_IDS = listOf(
-    R.id.card_o,
-    R.id.card_x,
+    R.id.card_answer_row,
     R.id.card_input,
     R.id.card_submit,
     R.id.card_skip,
@@ -34,8 +36,9 @@ private val RESULT_HIDDEN_VIEW_IDS = listOf(
 private const val RESULT_AUTO_CLOSE_MS = 4000L
 
 // 카드가 나타나고 결과 아이콘이 튀어 오르는 시간과 시작 크기. 보기 좋게 임의로 정한 값
-private const val ENTER_MS = 180L
-private const val ENTER_START_SCALE = 0.92f
+private const val ENTER_MS = 220L
+private const val ENTER_START_SCALE = 0.94f
+private const val ENTER_OFFSET_DP = 24f
 private const val ICON_POP_MS = 350L
 
 // 쇼츠 위에 띄우는 문제 카드. 문제 유형마다 레이아웃이 다름 (card_ox, card_short).
@@ -72,6 +75,10 @@ class CardOverlay(
                 root.findViewById<View>(R.id.card_submit).setOnClickListener {
                     onAnswer(input.text.toString())
                 }
+                input.setOnEditorActionListener { _, actionId, _ ->
+                    if (actionId == EditorInfo.IME_ACTION_DONE) onAnswer(input.text.toString())
+                    actionId == EditorInfo.IME_ACTION_DONE
+                }
             }
         }
         liftAboveKeyboard()
@@ -94,12 +101,15 @@ class CardOverlay(
             WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
         }
         windowManager.addView(root, params)
-        // 카드가 살짝 커지며 나타남
+        // 카드가 아래에서 살짝 떠오르며 나타남
+        root.alpha = 0f
+        root.animate().alpha(1f).setDuration(ENTER_MS).start()
         (root as ViewGroup).getChildAt(0).apply {
-            alpha = 0f
             scaleX = ENTER_START_SCALE
             scaleY = ENTER_START_SCALE
-            animate().alpha(1f).scaleX(1f).scaleY(1f).setDuration(ENTER_MS).start()
+            translationY = ENTER_OFFSET_DP * resources.displayMetrics.density
+            animate().scaleX(1f).scaleY(1f).translationY(0f).setDuration(ENTER_MS)
+                .setInterpolator(DecelerateInterpolator()).start()
         }
     }
 
@@ -115,9 +125,9 @@ class CardOverlay(
         } else {
             themed.getString(R.string.card_my_answer, myAnswer.trim())
         }
+        root.findViewById<View>(R.id.card_result_box).visibility = View.VISIBLE
         root.findViewById<ImageView>(R.id.card_result_icon).apply {
             setImageResource(if (correct) R.drawable.ic_card_correct else R.drawable.ic_card_wrong)
-            visibility = View.VISIBLE
             // 결과 아이콘이 살짝 튀어 오르며 나타남
             scaleX = 0f
             scaleY = 0f
@@ -126,7 +136,7 @@ class CardOverlay(
         }
         root.findViewById<TextView>(R.id.card_result).apply {
             text = themed.getString(if (correct) R.string.card_correct else R.string.card_wrong)
-            visibility = View.VISIBLE
+            setTextColor(themed.getColor(if (correct) R.color.card_correct else R.color.card_wrong))
         }
         root.findViewById<TextView>(R.id.card_result_detail).apply {
             text = if (correct) {
@@ -134,11 +144,13 @@ class CardOverlay(
             } else {
                 myAnswerText + "\n" + themed.getString(R.string.card_correct_answer, correctAnswer)
             }
-            visibility = View.VISIBLE
         }
-        root.findViewById<View>(R.id.card_confirm).apply {
-            visibility = View.VISIBLE
-            setOnClickListener { onClose() }
+        root.findViewById<View>(R.id.card_confirm).setOnClickListener { onClose() }
+        // 자동으로 닫히기까지 남은 시간을 줄어드는 막대로 보여 줌
+        root.findViewById<View>(R.id.card_timer).apply {
+            pivotX = 0f
+            animate().scaleX(0f).setDuration(RESULT_AUTO_CLOSE_MS)
+                .setInterpolator(LinearInterpolator()).start()
         }
         handler.postDelayed(onClose, RESULT_AUTO_CLOSE_MS)
     }

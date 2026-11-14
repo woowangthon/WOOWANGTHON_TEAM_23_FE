@@ -6,6 +6,13 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.ui.Modifier
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -26,41 +33,47 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         serviceEnabled = isAccessibilityServiceEnabled(this)
+        enableEdgeToEdge()
         setContent {
             ScrollMateTheme {
-                var pickedUris by remember { mutableStateOf<List<Uri>>(emptyList()) }
-                val picker = rememberLauncherForActivityResult(
-                    ActivityResultContracts.OpenMultipleDocuments(),
-                ) { pickedUris = it }
+                Surface(color = MaterialTheme.colorScheme.background, modifier = Modifier.fillMaxSize()) {
+                    Box(Modifier.safeDrawingPadding()) {
+                        var pickedUris by remember { mutableStateOf<List<Uri>>(emptyList()) }
+                        val picker = rememberLauncherForActivityResult(
+                            ActivityResultContracts.OpenMultipleDocuments(),
+                        ) { pickedUris = it }
 
-                // 서비스가 꺼져 있으면 안내를 먼저 보여 주고, 켜지면 자동으로 닫힘. 홈에서 다시 열 수도 있음
-                var guideSkipped by rememberSaveable { mutableStateOf(false) }
-                var guideRequested by rememberSaveable { mutableStateOf(false) }
-                var showMaterials by rememberSaveable { mutableStateOf(false) }
+                        // 서비스가 꺼져 있으면 안내를 먼저 보여 주고, 켜지면 자동으로 닫힘. 홈에서 다시 열 수도 있음
+                        var guideSkipped by rememberSaveable { mutableStateOf(false) }
+                        var guideRequested by rememberSaveable { mutableStateOf(false) }
+                        var showMaterials by rememberSaveable { mutableStateOf(false) }
 
-                if (guideRequested || (!serviceEnabled && !guideSkipped)) {
-                    AccessibilityGuideScreen(
-                        enabled = serviceEnabled,
-                        onOpenSettings = { startActivity(accessibilitySettingsIntent()) },
-                        onDismiss = {
-                            guideSkipped = true
-                            guideRequested = false
-                        },
-                    )
-                } else {
-                    if (showMaterials) {
-                        BackHandler { showMaterials = false }
-                        MaterialListRoute(onBack = { showMaterials = false })
-                    } else {
-                        HomeRoute(
-                            onUploadClick = { picker.launch(SUPPORTED_MIME_TYPES) },
-                            onMaterialsClick = { showMaterials = true },
-                            onGuideClick = { guideRequested = true },
-                        )
-                    }
+                        if (guideRequested || (!serviceEnabled && !guideSkipped)) {
+                            AccessibilityGuideScreen(
+                                enabled = serviceEnabled,
+                                onOpenSettings = { startActivity(accessibilitySettingsIntent()) },
+                                onDismiss = {
+                                    guideSkipped = true
+                                    guideRequested = false
+                                },
+                            )
+                        } else {
+                            if (showMaterials) {
+                                BackHandler { showMaterials = false }
+                                MaterialListRoute(onBack = { showMaterials = false })
+                            } else {
+                                HomeRoute(
+                                    serviceEnabled = serviceEnabled,
+                                    onUploadClick = { picker.launch(SUPPORTED_MIME_TYPES) },
+                                    onMaterialsClick = { showMaterials = true },
+                                    onGuideClick = { guideRequested = true },
+                                )
+                            }
 
-                    if (pickedUris.isNotEmpty()) {
-                        UploadFlow(uris = pickedUris, onFinished = { pickedUris = emptyList() })
+                            if (pickedUris.isNotEmpty()) {
+                                UploadFlow(uris = pickedUris, onFinished = { pickedUris = emptyList() })
+                            }
+                        }
                     }
                 }
             }
