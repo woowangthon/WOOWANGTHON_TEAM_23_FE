@@ -50,7 +50,17 @@ fun UploadFlow(uris: List<Uri>, onFinished: () -> Unit) {
         selection = result
         accepted = described.filter { (_, candidate) -> result.accepted.any { it === candidate } }
         if (result.accepted.isEmpty()) {
-            Toast.makeText(context, R.string.upload_nothing_to_upload, Toast.LENGTH_SHORT).show()
+            // 큰 파일만 골랐을 때도 형식 문제로 보이지 않게 크기 이유를 따로 알려 줌 (FE #17)
+            val message = if (result.tooLarge.isNotEmpty()) {
+                context.getString(
+                    R.string.upload_too_large,
+                    (MAX_UPLOAD_FILE_BYTES / BYTES_PER_MB).toInt(),
+                    result.tooLarge.joinToString { it.name },
+                )
+            } else {
+                context.getString(R.string.upload_nothing_to_upload)
+            }
+            Toast.makeText(context, message, Toast.LENGTH_LONG).show()
             onFinished()
         }
     }

@@ -27,6 +27,8 @@ import kotlin.random.Random
 
 private const val TAG = "ScrollInterrupt"
 private const val SHORTS_FEED_ID = "com.google.android.youtube:id/reel_recycler"
+// 광고 쇼츠에만 있는 view ID. 에뮬레이터에서 광고 12개 모두에 있고 일반 쇼츠 28개에는 없었음 (FE #4)
+private const val AD_OVERLAY_ID = "com.google.android.youtube:id/reel_player_delegated_overlay"
 private const val PAGE_SETTLE_MS = 400L
 private val KST = ZoneId.of("Asia/Seoul")
 
@@ -43,6 +45,9 @@ class ScrollInterruptService : AccessibilityService() {
     private var card: CardOverlay? = null
     private var currentPage: Int? = null
     private var skipNextSwipe = false
+
+    // 광고에서 카드가 뽑히면 띄우지 않고 광고가 아닌 다음 쇼츠로 미룸
+    private var deferredByAd = false
 
     // 문제를 고르는 동안 같은 넘김으로 카드가 두 번 뜨지 않게 막음
     private var cardLoading = false
@@ -98,9 +103,16 @@ class ScrollInterruptService : AccessibilityService() {
         }
         val now = SystemClock.elapsedRealtime()
         val chance = cardChance(now - (shortsEnteredAtMs ?: now))
-        val shouldShow = Random.nextDouble() < chance
-        Log.i(TAG, "swipe chance=$chance show=$shouldShow")
-        if (shouldShow) prepareCard()
+        val shouldShow = deferredByAd || Random.nextDouble() < chance
+        val ad = rootInActiveWindow?.isAdShowing() == true
+        Log.i(TAG, "swipe chance=$chance show=$shouldShow ad=$ad")
+        if (!shouldShow) return
+        if (ad) {
+            deferredByAd = true
+            return
+        }
+        deferredByAd = false
+        prepareCard()
     }
 
     // 저장된 문제를 골라 카드를 띄움. 고를 문제가 없으면 카드를 띄우지 않고 다음 넘김을 그대로 셈
@@ -131,6 +143,9 @@ class ScrollInterruptService : AccessibilityService() {
 
     private fun AccessibilityNodeInfo.findVisibleShortsFeed() =
         findAccessibilityNodeInfosByViewId(SHORTS_FEED_ID).firstOrNull { it.isVisibleToUser }
+
+    private fun AccessibilityNodeInfo.isAdShowing() =
+        findAccessibilityNodeInfosByViewId(AD_OVERLAY_ID).any { it.isVisibleToUser }
 
     private fun AccessibilityNodeInfo.singleChild() =
         if (childCount == 1) getChild(0) else null

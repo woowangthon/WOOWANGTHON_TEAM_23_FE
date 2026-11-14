@@ -22,8 +22,7 @@ import androidx.compose.ui.res.stringResource
 import com.woowang.scrollmate.R
 import com.woowang.scrollmate.domain.SubjectCard
 
-// 앱을 열면 처음 보는 화면. 학습 주제 카드와 시험일까지 남은 날짜, 자료 올리기를 보여 줌.
-// 오늘의 한마디는 시청 기록(#8)과 조언 API가 준비되기 전이라 자리만 둠
+// 앱을 열면 처음 보는 화면. 학습 주제 카드와 시험일까지 남은 날짜, 자료 올리기를 보여 줌
 @Composable
 fun HomeScreen(
     cards: List<SubjectCard>,
@@ -47,7 +46,6 @@ fun HomeScreen(
                 style = MaterialTheme.typography.headlineMedium,
             )
         }
-        item { TodayMessageCard() }
         if (failureCount > 0) {
             item { UploadFailureBanner(failureCount, onMaterialsClick) }
         }
@@ -97,25 +95,6 @@ fun HomeScreen(
 }
 
 private const val UNCLASSIFIED_KEY = -1L
-
-@Composable
-private fun TodayMessageCard() {
-    Card(modifier = Modifier.fillMaxWidth()) {
-        Column(
-            modifier = Modifier.padding(dimensionResource(R.dimen.sheet_padding)),
-            verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.sheet_spacing)),
-        ) {
-            Text(
-                text = stringResource(R.string.home_today_title),
-                style = MaterialTheme.typography.titleMedium,
-            )
-            Text(
-                text = stringResource(R.string.home_today_empty),
-                style = MaterialTheme.typography.bodyMedium,
-            )
-        }
-    }
-}
 
 // 눌러서 이름과 시험일을 고침. 학습 주제가 없는 자료를 모은 미분류 카드는 고칠 대상이 없음
 @Composable
