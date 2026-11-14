@@ -4,8 +4,6 @@
     <string name="service_label">스크롤 인터럽트</string>
     <string name="service_description">쇼츠 피드 진입과 스크롤만 감지해 문제 카드를 표시함. 영상 내용, 댓글, 계정 정보는 수집하지 않음.</string>
     <string name="home_title">스크롤 메이트</string>
-    <string name="home_today_title">오늘의 한마디</string>
-    <string name="home_today_empty">준비 중이에요</string>
     <string name="home_subjects_title">학습 주제</string>
     <string name="home_subjects_empty">아직 학습 주제가 없어요. 자료를 올릴 때 학습 주제를 정하면 여기에 보여요</string>
     <string name="home_materials_count">자료 %1$d개</string>
