@@ -1,12 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- 앱 전체 기본 테마. 화면은 Compose가 그리고, 여기서는 시작 화면 배경과 상태 표시줄만 정함 -->
+    <style name="Theme.ScrollMate" parent="@android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/app_background</item>
+        <item name="android:colorAccent">@color/brand</item>
+        <item name="android:windowSplashScreenBackground">@color/app_background</item>
+    </style>
+
     <!-- 공유 수신 화면용: 배경이 투명해서 보던 앱 위에 시트만 뜸 -->
     <style name="Theme.ScrollMate.Translucent" parent="@android:style/Theme.Material.Light.NoActionBar">
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:backgroundDimEnabled">false</item>
+        <item name="android:colorAccent">@color/brand</item>
     </style>
 
     <!-- 접근성 서비스 컨텍스트에는 테마가 없어서 카드를 만들 때 이 테마로 감쌈 -->
-    <style name="Theme.ScrollMate.Card" parent="@android:style/Theme.Material.Light.NoActionBar" />
+    <style name="Theme.ScrollMate.Card" parent="@android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:colorAccent">@color/brand</item>
+        <item name="android:textColorHighlight">@color/brand_soft</item>
+    </style>
 </resources>

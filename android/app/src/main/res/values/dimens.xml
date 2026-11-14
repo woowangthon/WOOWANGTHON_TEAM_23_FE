@@ -1,11 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="screen_padding">24dp</dimen>
-    <dimen name="sheet_padding">24dp</dimen>
+    <dimen name="screen_padding">20dp</dimen>
+    <dimen name="sheet_padding">20dp</dimen>
     <dimen name="sheet_spacing">12dp</dimen>
     <dimen name="card_margin">16dp</dimen>
-    <dimen name="card_padding">20dp</dimen>
-    <dimen name="card_radius">16dp</dimen>
-    <dimen name="card_text_size">18sp</dimen>
-    <dimen name="card_result_icon_size">56dp</dimen>
+    <dimen name="card_padding">22dp</dimen>
+    <dimen name="card_radius">28dp</dimen>
+    <dimen name="card_text_size">20sp</dimen>
+    <dimen name="card_detail_size">16sp</dimen>
+    <dimen name="card_label_size">13sp</dimen>
+    <dimen name="card_ox_size">40sp</dimen>
+    <dimen name="card_ox_height">104dp</dimen>
+    <dimen name="card_button_height">52dp</dimen>
+    <dimen name="card_gap">12dp</dimen>
+    <dimen name="card_result_icon_size">64dp</dimen>
 </resources>
