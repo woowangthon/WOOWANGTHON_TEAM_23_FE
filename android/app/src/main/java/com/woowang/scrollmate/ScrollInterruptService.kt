@@ -14,6 +14,7 @@ import com.woowang.scrollmate.data.AnswerRecord
 import com.woowang.scrollmate.data.AnswerResult
 import com.woowang.scrollmate.data.DEV_MATERIAL_ID
 import com.woowang.scrollmate.data.Question
+import com.woowang.scrollmate.data.WatchRecorder
 import com.woowang.scrollmate.domain.cardChance
 import com.woowang.scrollmate.domain.grade
 import kotlinx.coroutines.CoroutineScope
@@ -53,6 +54,7 @@ class ScrollInterruptService : AccessibilityService() {
     private var cardLoading = false
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private val container get() = (application as ScrollMateApp).container
+    private val recorder by lazy { WatchRecorder(container.database.watchSessionDao(), scope) }
 
     // 쇼츠에 들어온 시각. 쇼츠를 나가면 비워서 다음에 들어올 때 0분부터 다시 셈 (FE #13)
     private var shortsEnteredAtMs: Long? = null
@@ -74,8 +76,12 @@ class ScrollInterruptService : AccessibilityService() {
         if (card != null) return
 
         val feed = rootInActiveWindow?.findVisibleShortsFeed()
+        val now = System.currentTimeMillis()
         if (feed == null) {
-            if (currentPage != null) Log.i(TAG, "shorts exit")
+            if (currentPage != null) {
+                Log.i(TAG, "shorts exit")
+                recorder.exit(now)
+            }
             currentPage = null
             shortsEnteredAtMs = null
             return
@@ -89,9 +95,13 @@ class ScrollInterruptService : AccessibilityService() {
             null -> {
                 shortsEnteredAtMs = SystemClock.elapsedRealtime()
                 Log.i(TAG, "shorts enter")
+                recorder.enter(now)
             }
-            page -> return
-            else -> onSwipe()
+            page -> recorder.tick(now)
+            else -> {
+                recorder.swipe(now)
+                onSwipe()
+            }
         }
     }
 
@@ -135,6 +145,7 @@ class ScrollInterruptService : AccessibilityService() {
     }
 
     override fun onDestroy() {
+        recorder.exit(System.currentTimeMillis())
         scope.cancel()
         super.onDestroy()
     }
@@ -153,6 +164,7 @@ class ScrollInterruptService : AccessibilityService() {
     private fun showCard(question: Question) {
         val focus = audioManager.requestAudioFocus(audioFocus)
         Log.i(TAG, "card shown audioFocus=$focus question=${question.id}")
+        recorder.cardShown(System.currentTimeMillis())
 
         card = CardOverlay(this, windowManager, question) { input -> dismissCard(question, input) }
             .also { it.show() }
@@ -162,6 +174,7 @@ class ScrollInterruptService : AccessibilityService() {
     private fun dismissCard(question: Question, input: String?) {
         val result = if (input == null) AnswerResult.SKIPPED else grade(question, input)
         Log.i(TAG, "card answered question=${question.id} result=$result")
+        recorder.cardResult(System.currentTimeMillis(), result)
         if (input == null) {
             closeCard()
         } else {

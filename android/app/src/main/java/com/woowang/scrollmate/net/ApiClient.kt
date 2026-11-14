@@ -85,6 +85,17 @@ class ApiClient(
         return execute(request) { json.decodeFromString<RecordedResponse>(it).recorded }
     }
 
+    suspend fun postUsage(days: List<UsageDayDto>): Int {
+        val body = json.encodeToString(UsageRequest(days)).toRequestBody(JSON_MEDIA_TYPE.toMediaType())
+        val request = requestBuilder("$base$API_PREFIX/usage/daily").post(body).build()
+        return execute(request) { json.decodeFromString<RecordedResponse>(it).recorded }
+    }
+
+    suspend fun getTodayAdvice(): AdviceResponse {
+        val request = requestBuilder("$base$API_PREFIX/advice/today").get().build()
+        return execute(request) { json.decodeFromString<AdviceResponse>(it) }
+    }
+
     private fun requestBuilder(url: String) =
         Request.Builder().url(url).header(HEADER_DEVICE_ID, deviceId())
 

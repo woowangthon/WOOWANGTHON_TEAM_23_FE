@@ -2,7 +2,7 @@
 <resources>
     <string name="app_name">스크롤 메이트</string>
     <string name="service_label">스크롤 인터럽트</string>
-    <string name="service_description">쇼츠 피드 진입과 스크롤만 감지해 문제 카드를 표시함. 영상 내용, 댓글, 계정 정보는 수집하지 않음.</string>
+    <string name="service_description">쇼츠 피드 진입과 스크롤만 감지해 문제 카드를 표시하고, 본 시간과 넘긴 횟수를 기기에 기록함. 영상 내용, 댓글, 계정 정보는 수집하지 않음.</string>
     <string name="home_title">스크롤 메이트</string>
     <string name="home_subjects_title">학습 주제</string>
     <string name="home_subjects_empty">아직 학습 주제가 없어요. 자료를 올릴 때 학습 주제를 정하면 여기에 보여요</string>
@@ -16,6 +16,16 @@
     <string name="home_materials_desc">문제 준비 상태를 확인해요</string>
     <string name="home_tagline">쇼츠 넘기는 사이,\n한 문제씩 복습해요</string>
     <string name="home_hero_body">공부할 PDF나 PPTX를 올리면 문제를 만들어 두고, 쇼츠를 볼 때 카드로 찾아가요</string>
+    <string name="home_today_title">오늘의 한마디</string>
+    <string name="home_today_empty">쇼츠를 보고 나면 그 기록을 보고 한마디 해 줄게요</string>
+    <string name="home_today_based_on">%1$s 기록 기준</string>
+    <string name="home_day_today">오늘</string>
+    <string name="home_day_yesterday">어제</string>
+    <string name="home_day_date">%1$d월 %2$d일</string>
+    <string name="home_stat_minutes">오늘 쇼츠(분)</string>
+    <string name="home_stat_swipes">넘긴 횟수</string>
+    <string name="home_stat_cards">맞힌 카드</string>
+    <string name="home_stat_cards_value">%1$d/%2$d</string>
     <string name="home_service_on">카드 켜짐</string>
     <string name="home_service_off">카드 꺼짐</string>
     <string name="home_service_off_title">아직 카드가 쇼츠에 뜨지 않아요</string>
@@ -86,7 +96,7 @@
     <string name="guide_title">카드를 띄우려면 접근성 서비스를 켜 주세요</string>
     <string name="guide_enabled_title">접근성 서비스가 켜져 있어요</string>
     <string name="guide_scope_title">허용하면 이렇게 동작해요</string>
-    <string name="guide_scope">YouTube 쇼츠에 들어오고 넘기는 것만 감지해서 문제 카드를 띄워요. 영상 내용, 댓글, 계정 정보는 수집하지 않아요.</string>
+    <string name="guide_scope">YouTube 쇼츠에 들어오고 넘기는 것만 감지해서 문제 카드를 띄워요. 본 시간과 넘긴 횟수는 기기에 기록하고, 오늘의 한마디를 위해 하루 합계만 서버로 보내요. 영상 내용, 댓글, 계정 정보는 수집하지 않아요.</string>
     <string name="guide_steps_title">켜는 방법</string>
     <string name="guide_step_1">1. 아래 버튼으로 접근성 설정을 열어요</string>
     <string name="guide_step_2">2. 설치된 앱(또는 다운로드한 앱)에서 \'%1$s\'를 골라요</string>

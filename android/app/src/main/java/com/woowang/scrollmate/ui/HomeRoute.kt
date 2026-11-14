@@ -1,6 +1,7 @@
 package com.woowang.scrollmate.ui
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -12,8 +13,10 @@ import androidx.compose.ui.platform.LocalContext
 import com.woowang.scrollmate.ScrollMateApp
 import com.woowang.scrollmate.data.Subject
 import com.woowang.scrollmate.domain.buildSubjectCards
+import com.woowang.scrollmate.domain.summarizeByDay
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import java.time.ZoneId
 
 // 기기에 저장된 학습 주제와 자료를 읽어 홈 화면에 넘김. 학습 주제와 시험일은 기기 DB에만 저장하고 서버로 보내지 않음
 @Composable
@@ -29,6 +32,13 @@ fun HomeRoute(
     val materials by container.materialRepository.observeMaterials().collectAsState(initial = emptyList())
     val cards = remember(subjects, materials) { buildSubjectCards(subjects, materials, LocalDate.now()) }
     val failures by container.uploadFailures.failures.collectAsState()
+    val advice by container.adviceRepository.advice.collectAsState()
+    val zone = remember { ZoneId.systemDefault() }
+    val startOfToday = remember { LocalDate.now(zone).atStartOfDay(zone).toInstant().toEpochMilli() }
+    val todaySessions by container.database.watchSessionDao().observeSince(startOfToday)
+        .collectAsState(initial = emptyList())
+    val todayWatch = remember(todaySessions) { summarizeByDay(todaySessions, zone).firstOrNull() }
+    LaunchedEffect(Unit) { container.adviceRepository.refresh() }
     val scope = rememberCoroutineScope()
 
     // 편집 창: 열려 있는지와 고치는 주제의 id(null이면 새로 만듦)
@@ -38,6 +48,8 @@ fun HomeRoute(
     HomeScreen(
         cards = cards,
         serviceEnabled = serviceEnabled,
+        advice = advice,
+        todayWatch = todayWatch,
         onToggleEnabled = { card, enabled ->
             card.subject?.let { scope.launch { subjectDao.update(it.copy(enabled = enabled)) } }
         },

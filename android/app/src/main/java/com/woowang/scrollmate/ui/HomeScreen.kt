@@ -38,7 +38,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.woowang.scrollmate.R
+import com.woowang.scrollmate.data.Advice
 import com.woowang.scrollmate.domain.SubjectCard
+import com.woowang.scrollmate.domain.WatchDay
+import java.time.LocalDate
 
 // 시험이 이만큼 남으면 D-day 표시를 강조함. 보기 좋게 임의로 정한 값
 private const val URGENT_DAYS = 3L
@@ -48,6 +51,8 @@ private const val URGENT_DAYS = 3L
 fun HomeScreen(
     cards: List<SubjectCard>,
     serviceEnabled: Boolean,
+    advice: Advice?,
+    todayWatch: WatchDay?,
     onToggleEnabled: (SubjectCard, Boolean) -> Unit,
     onAddSubject: () -> Unit,
     onEditSubject: (SubjectCard) -> Unit,
@@ -62,6 +67,7 @@ fun HomeScreen(
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         item { HomeHeader(serviceEnabled, onGuideClick) }
+        item { TodayCard(advice, todayWatch) }
         item { HeroCard(onUploadClick) }
         if (!serviceEnabled) {
             item { ServiceOffCard(onGuideClick) }
@@ -208,6 +214,68 @@ private fun HeroCard(onUploadClick: () -> Unit) {
             Spacer(Modifier.width(8.dp))
             Text(stringResource(R.string.upload_button), style = MaterialTheme.typography.labelLarge)
         }
+    }
+}
+
+// 오늘의 한마디. 문장은 서버의 규칙이 고른 사실을 AI가 말로 바꾼 것이고, 아래 숫자는 기기에 쌓인 오늘 기록
+@Composable
+private fun TodayCard(advice: Advice?, todayWatch: WatchDay?) {
+    AppCard {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(
+                Modifier
+                    .size(8.dp)
+                    .clip(CircleShape)
+                    .background(Brand.Accent),
+            )
+            Spacer(Modifier.width(8.dp))
+            Text(stringResource(R.string.home_today_title), style = MaterialTheme.typography.titleSmall, color = Brand.InkSub)
+            if (advice?.basedOn != null) {
+                Spacer(Modifier.weight(1f))
+                Text(stringResource(R.string.home_today_based_on, dayLabel(advice.basedOn)), style = CaptionStyle)
+            }
+        }
+        Spacer(Modifier.height(10.dp))
+        Text(
+            text = advice?.message ?: stringResource(R.string.home_today_empty),
+            style = MaterialTheme.typography.bodyLarge,
+            fontWeight = if (advice != null) FontWeight.SemiBold else FontWeight.Normal,
+            color = if (advice != null) Brand.Ink else Brand.InkSub,
+        )
+        Spacer(Modifier.height(14.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+            Stat(stringResource(R.string.home_stat_minutes), (todayWatch?.totalMinutes ?: 0).toString(), Modifier.weight(1f))
+            Stat(stringResource(R.string.home_stat_swipes), (todayWatch?.swipes ?: 0).toString(), Modifier.weight(1f))
+            Stat(
+                stringResource(R.string.home_stat_cards),
+                stringResource(R.string.home_stat_cards_value, todayWatch?.correct ?: 0, todayWatch?.cardsAnswered ?: 0),
+                Modifier.weight(1f),
+            )
+        }
+    }
+}
+
+@Composable
+private fun dayLabel(isoDate: String): String {
+    val day = runCatching { LocalDate.parse(isoDate) }.getOrNull() ?: return isoDate
+    val today = LocalDate.now()
+    return when (day) {
+        today -> stringResource(R.string.home_day_today)
+        today.minusDays(1) -> stringResource(R.string.home_day_yesterday)
+        else -> stringResource(R.string.home_day_date, day.monthValue, day.dayOfMonth)
+    }
+}
+
+@Composable
+private fun Stat(label: String, value: String, modifier: Modifier) {
+    Column(
+        modifier = modifier
+            .clip(RoundedCornerShape(14.dp))
+            .background(Brand.Background)
+            .padding(horizontal = 12.dp, vertical = 10.dp),
+    ) {
+        Text(value, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, color = Brand.Ink)
+        Text(label, style = CaptionStyle)
     }
 }
 

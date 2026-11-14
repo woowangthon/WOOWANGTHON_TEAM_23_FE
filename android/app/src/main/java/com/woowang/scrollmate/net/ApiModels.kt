@@ -56,3 +56,28 @@ data class ErrorResponse(val error: ErrorBody)
 
 @Serializable
 data class ErrorBody(val code: String, val message: String)
+
+@Serializable
+data class UsageDayDto(
+    val date: String,
+    val sessionCount: Int,
+    val totalMinutes: Int,
+    val swipes: Int,
+    val cardsShown: Int,
+    val cardsAnswered: Int,
+    val cardsSkipped: Int,
+    val correct: Int,
+    val lateNightShare: Double,
+    val longestSessionMinutes: Int,
+)
+
+@Serializable
+data class UsageRequest(val days: List<UsageDayDto>)
+
+@Serializable
+data class AdviceResponse(
+    // 시청 기록이 없으면 null
+    val message: String? = null,
+    val basedOn: String? = null,
+    val fallback: Boolean = false,
+)
